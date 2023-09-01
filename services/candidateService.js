@@ -29,11 +29,13 @@ async function getSelection(id) {
 
 async function createStep1(user) {
     const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
+    const date = new Date();
+    const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
     const result = await db.query(
         `INSERT INTO candidate 
     (userId, email, password, created, active) 
     VALUES 
-    ('${randomString}', '${user.email}', '${user.password}','2023-08-04 17:01:51', 0)`
+    ('${randomString}', '${user.email}', '${user.password}','${formatted}', 0)`
     );
 
     let message = "Error in creating user profile";
