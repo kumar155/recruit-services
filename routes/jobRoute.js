@@ -29,6 +29,22 @@ router.get("/recentjobs", async function (req, res, next) {
     }
 });
 
+router.post("/filters", async function (req, res, next) {
+    try {
+        const filters = Object.keys(req.body);
+        if (filters.includes('category')) {
+            res.json(await jobService.getJobsByCategory(req.body.category));
+        }
+        if (filters.includes('location')) {
+            res.json(await jobService.getJobsByLocation(req.body.location));
+        }
+    } catch (err) {
+        console.error(`Error while getting job details `, err.message);
+        next(err);
+    }
+});
+
+
 router.get("/:id", async function (req, res, next) {
     try {
         res.json(await jobService.getJobDetails(req.params.id));

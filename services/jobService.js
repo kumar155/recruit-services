@@ -5,11 +5,12 @@ const config = require("../config");
 async function jobsByCategory() {
     // const offset = helper.getOffset(page, config.listPerPage);
 
-    const query = `SELECT title as label, COUNT(*) as count
-                    FROM jobs
-                    WHERE active = 1
-                    GROUP BY title
-                    LIMIT 4`
+    const query = `SELECT * from (SELECT title as label, COUNT(*) as count
+                        FROM recruit.jobs
+                        WHERE active = 1
+                        GROUP BY title) as t1
+                        ORDER BY t1.count DESC
+                        LIMIT 4`;
     const rows = await db.query(query);
     const data = helper.emptyOrRows(rows);
     return {
@@ -45,11 +46,28 @@ async function recentJobs() {
 
 async function getJobDetails(jobId) {
     const query = `SELECT * from recruit.jobs where jobId='${jobId}' and id <> 0`;
+    const skillsQuery = `SELECT * from skills`;
     const rows = await db.query(query);
-    const data = helper.emptyOrRows(rows);
-    return {
-        data,
+    const skills = await db.query(skillsQuery);
+    const res = {
+        jobs: helper.emptyOrRows(rows),
+        skills: helper.emptyOrRows(skills),
     };
+    return res;
+}
+
+async function getJobsByCategory(category) {
+    const query = `SELECT * FROM recruit.jobs where title = '${category}' and id <> 0`;
+    const rows = await db.query(query);
+    
+    return helper.emptyOrRows(rows);
+}
+
+async function getJobsByLocation(location) {
+    const query = `SELECT * FROM recruit.jobs where location = '${location}' and id <> 0`;
+    const rows = await db.query(query);
+    
+    return helper.emptyOrRows(rows);
 }
 
 
@@ -58,4 +76,6 @@ module.exports = {
     jobsByLocation,
     recentJobs,
     getJobDetails,
+    getJobsByCategory,
+    getJobsByLocation,
 };

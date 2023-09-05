@@ -2,6 +2,9 @@ const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
 
+const date = new Date();
+const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
+
 async function getAll(page = 1) {
     const offset = helper.getOffset(page, config.listPerPage);
     const rows = await db.query(
@@ -29,8 +32,6 @@ async function getSelection(id) {
 
 async function createStep1(user) {
     const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
-    const date = new Date();
-    const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
     const result = await db.query(
         `INSERT INTO candidate 
     (userId, email, password, created, active) 
@@ -52,7 +53,7 @@ async function createStep2(user) {
         `INSERT INTO candidateprofile 
     (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
     VALUES 
-    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '2023-08-04 17:01:51')`
+    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted}')`
     );
 
     let message = "Error in building user profile";
@@ -66,12 +67,12 @@ async function createStep2(user) {
 
 async function apply(user) {
     let topSkills = [];
-    user.primarySkills && user.primarySkills.forEach(skill => topSkills.push(skill.text));
+    user.primarySkills && user.primarySkills.forEach(skill => topSkills.push(skill.id));
     let skills = [];
-    user.secondarySkills && user.secondarySkills.forEach(skill => skills.push(skill.text));
+    user.secondarySkills && user.secondarySkills.forEach(skill => skills.push(skill.id));
     const query = `UPDATE candidateprofile 
     SET designation='${user.designation}', skills='${skills.join(',')}', topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}', github='${user.github}'
-    WHERE (userId='${user.randomString}' AND id <> 0)`;
+    WHERE (userId='3Z4K0' AND id <> 0)`;
     const result = await db.query(query);
 
     let message = "Error in building user profile";

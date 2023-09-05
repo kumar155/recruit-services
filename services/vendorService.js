@@ -31,15 +31,19 @@ async function getSelection(id) {
 async function createStep1(job) {
     const randomString = Math.floor(Math.random() * 90000) + 10000;
     const id = `POS${randomString}`;
-    const datecreated = moment(new Date()).format('YYYY-MM-DD HH:MM:SS');
+    // const datecreated = moment(new Date()).format('YYYY-MM-DD HH:MM:SS');
     const date = new Date();
     const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
+    let primarySkills = [];
+    job.primarySkills && job.primarySkills.forEach(skill => primarySkills.push(skill.id));
+    let secondarySkills = [];
+    job.secondarySkills && job.secondarySkills.forEach(skill => secondarySkills.push(skill.id));
     const result = await db.query(
         `INSERT INTO jobs 
-        (jobId, title, location, persona, positions, category, skills, active, created) 
+        (jobId, title, location, persona, positions, category, skills, secondarySkills, active, created) 
         VALUES 
         ('${id}', '${job.title}', '${job.location}', '${job.persona}', '${job.positions}', '${job.category}',
-        '${job.skills}',0, '${formatted}')`
+        '${primarySkills.join(',')}', '${secondarySkills.join(',')}',0, '${formatted}')`
     );
 
     let message = "Error in creating a job";
@@ -72,7 +76,7 @@ async function publish(user) {
         responsibilities = `${responsibilities}<$>${skill.value}`;
     });
     const query = `UPDATE jobs
-        SET responsibilities='${responsibilities}'
+        SET responsibilities='${JSON.stringify(responsibilities)}', active = 1
         WHERE (jobId='${user.jobId}' AND id <> 0)`;
     const result = await db.query(query);
 
