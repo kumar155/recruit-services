@@ -20,6 +20,15 @@ router.get("/locations", async function (req, res, next) {
     }
 });
 
+router.get("/locationsall", async function (req, res, next) {
+    try {
+        res.json(await jobService.getAllLocations(req.query.page));
+    } catch (err) {
+        console.error(`Error while getting programming languages `, err.message);
+        next(err);
+    }
+});
+
 router.get("/recentjobs", async function (req, res, next) {
     try {
         res.json(await jobService.recentJobs(req.query.page));
@@ -32,10 +41,13 @@ router.get("/recentjobs", async function (req, res, next) {
 router.post("/filters", async function (req, res, next) {
     try {
         const filters = Object.keys(req.body);
-        if (filters.includes('category')) {
+        if (filters.includes('category') && filters.includes('location')) {
+            res.json(await jobService.getJobsByFilters(req.body));
+        }
+        else if (filters.includes('category')) {
             res.json(await jobService.getJobsByCategory(req.body.category));
         }
-        if (filters.includes('location')) {
+        else if (filters.includes('location')) {
             res.json(await jobService.getJobsByLocation(req.body.location));
         }
     } catch (err) {
@@ -62,5 +74,6 @@ router.post("/", async function (req, res, next) {
         next(err);
     }
 });
+
 
 module.exports = router;

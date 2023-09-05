@@ -35,6 +35,19 @@ async function jobsByLocation() {
     };
 }
 
+async function getAllLocations() {
+    const query = `SELECT * FROM
+                    (SELECT 
+                        location as label,
+                        COUNT(*) as count 
+                        FROM recruit.jobs
+                        WHERE active = 1
+                        GROUP BY location) as t1
+                    ORDER BY t1.count DESC;`
+    const rows = await db.query(query);
+    return helper.emptyOrRows(rows);
+}
+
 async function recentJobs() {
     const query = `SELECT title, location, category, created, jobId from recruit.jobs order by created desc limit 5`;
     const rows = await db.query(query);
@@ -59,14 +72,21 @@ async function getJobDetails(jobId) {
 async function getJobsByCategory(category) {
     const query = `SELECT * FROM recruit.jobs where title = '${category}' and id <> 0`;
     const rows = await db.query(query);
-    
+
     return helper.emptyOrRows(rows);
 }
 
 async function getJobsByLocation(location) {
     const query = `SELECT * FROM recruit.jobs where location = '${location}' and id <> 0`;
     const rows = await db.query(query);
-    
+
+    return helper.emptyOrRows(rows);
+}
+
+async function getJobsByFilters({ category, location }) {
+    const query = `SELECT * FROM recruit.jobs where title = '${category}' and location = '${location}' and id <> 0`;
+    const rows = await db.query(query);
+
     return helper.emptyOrRows(rows);
 }
 
@@ -78,4 +98,6 @@ module.exports = {
     getJobDetails,
     getJobsByCategory,
     getJobsByLocation,
+    getJobsByFilters,
+    getAllLocations,
 };

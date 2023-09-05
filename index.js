@@ -7,6 +7,7 @@ const candidateRouter = require("./routes/candidateRoute");
 const vendorRouter = require("./routes/vendorRoute");
 const skillsRouter = require("./routes/skillRoute");
 const jobsRouter = require("./routes/jobRoute");
+const candidateJobRouter = require("./routes/candidateJobRoute");
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
@@ -22,6 +23,7 @@ app.use("/users", candidateRouter);
 app.use("/vendor", vendorRouter);
 app.use("/skills", skillsRouter);
 app.use("/jobs", jobsRouter);
+app.use("/candidatejob", candidateJobRouter);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
