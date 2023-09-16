@@ -2,6 +2,7 @@ const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
 const moment = require('moment');
+const formatString = require("../utils/formatString");
 
 async function getAll(page = 1) {
     const offset = helper.getOffset(page, config.listPerPage);
@@ -56,9 +57,10 @@ async function createStep1(job) {
 }
 
 async function createStep2(job) {
+    const formattedDesc = formatString(job.description);
     const result = await db.query(
         `UPDATE jobs 
-    SET description='${job.description}'
+    SET description='${formattedDesc}'
     WHERE (jobId='${job.jobId}' AND id <> 0)`);
 
     let message = "Error creating job description";

@@ -11,6 +11,15 @@ router.get("/categories", async function (req, res, next) {
     }
 });
 
+router.get("/categoriesall", async function (req, res, next) {
+    try {
+        res.json(await jobService.getAllCategories(req.query.page));
+    } catch (err) {
+        console.error(`Error while getting programming languages `, err.message);
+        next(err);
+    }
+});
+
 router.get("/locations", async function (req, res, next) {
     try {
         res.json(await jobService.jobsByLocation(req.query.page));

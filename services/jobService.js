@@ -48,6 +48,16 @@ async function getAllLocations() {
     return helper.emptyOrRows(rows);
 }
 
+async function getAllCategories() {
+    const query = `SELECT * from (SELECT title as label, COUNT(*) as count
+                    FROM recruit.jobs
+                    WHERE active = 1
+                    GROUP BY title) as t1
+                    ORDER BY t1.count DESC`
+    const rows = await db.query(query);
+    return helper.emptyOrRows(rows);
+}
+
 async function recentJobs() {
     const query = `SELECT title, location, category, created, jobId from recruit.jobs order by created desc limit 5`;
     const rows = await db.query(query);
@@ -100,4 +110,5 @@ module.exports = {
     getJobsByLocation,
     getJobsByFilters,
     getAllLocations,
+    getAllCategories,
 };
