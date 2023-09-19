@@ -1,9 +1,10 @@
 const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
+const jwt = require("jsonwebtoken");
 
 const date = new Date();
-const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
+const formatted = () => date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
 
 async function getAll(page = 1) {
     const offset = helper.getOffset(page, config.listPerPage);
@@ -32,20 +33,28 @@ async function getSelection(id) {
 
 async function createStep1(user) {
     const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
+    let token = null;
     const result = await db.query(
         `INSERT INTO candidate 
-    (userId, email, password, created, active) 
+    (userId, email, password, created, active, firstName, lastName) 
     VALUES 
-    ('${randomString}', '${user.email}', '${user.password}','${formatted}', 0)`
+    ('${randomString}', '${user.email}', '${user.password}','${formatted()}', 0, '${user.firstName}', '${user.lastName}')`
     );
 
     let message = "Error in creating user profile";
 
     if (result.affectedRows) {
+        token = jwt.sign(
+            { user_id: randomString, email: user.email },
+            process.env.TOKEN_KEY,
+            {
+                expiresIn: "2h",
+            }
+        );
         message = "User profile created successfully";
     }
 
-    return { message, next: 1, randomString };
+    return { message, next: 1, randomString, token };
 }
 
 async function createStep2(user) {
@@ -53,7 +62,7 @@ async function createStep2(user) {
         `INSERT INTO candidateprofile 
     (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
     VALUES 
-    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted}')`
+    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted()}')`
     );
 
     let message = "Error in building user profile";
@@ -71,8 +80,10 @@ async function apply(user) {
     let skills = [];
     user.secondarySkills && user.secondarySkills.forEach(skill => skills.push(skill.id));
     const query = `UPDATE candidateprofile 
-    SET designation='${user.designation}', skills='${skills.join(',')}', topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}', github='${user.github}'
-    WHERE (userId='3Z4K0' AND id <> 0)`;
+    SET designation='${user.designation}', skills='${skills.join(',')}',
+    topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
+    github='${user.github}', updated='${formatted()}'
+    WHERE (userId='${user.randomString}' AND id <> 0)`;
     const result = await db.query(query);
 
     let message = "Error in building user profile";
