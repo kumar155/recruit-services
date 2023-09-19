@@ -10,8 +10,12 @@ async function login(user) {
 
     const data = helper.emptyOrRows(result);
     if (data.length > 0) {
+        const currentUser = data[0];
+        const profiles = await db.query(
+            `SELECT * from candidateprofile where (userId = '${currentUser.userId}' and id <> 0) order by created desc`
+        )
         const token = jwt.sign(
-            { user_id: result.userId, email: result.email },
+            { user_id: data[0].userId, email: data[0].email },
             process.env.TOKEN_KEY,
             {
                 expiresIn: "2h",
@@ -20,6 +24,7 @@ async function login(user) {
         return {
             token,
             data: data[0],
+            profile: profiles[0],
             success: true
         };
     }
