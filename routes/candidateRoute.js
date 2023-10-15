@@ -12,7 +12,6 @@ router.get("/", async function (req, res, next) {
 });
 
 router.get("/:id", async function (req, res, next) {
-    console.log(req);
     try {
       res.json(await candidateService.getSelection(req.params.id, req.body));
     } catch (err) {
@@ -68,5 +67,33 @@ router.delete("/:id", async function (req, res, next) {
     next(err);
   }
 });
+
+router.get("/history/:id", async function (req, res, next) {
+  try {
+    res.json(await candidateService.getHistory(req.params.id));
+  } catch (err) {
+    console.error(`Error while getting candidate history `, err.message);
+    next(err);
+  }
+});
+
+router.get("/profile/:id", async function (req, res, next) {
+  try {
+    res.json(await candidateService.getProfile(req.params.id));
+  } catch (err) {
+    console.error(`Error while getting candidate profile `, err.message);
+    next(err);
+  }
+});
+
+router.get("/status/:id", async function (req, res, next) {
+  try {
+    res.json(await candidateService.checkIsAppliedJob(req, req.params.id));
+  } catch (err) {
+    console.error(`Error while getting candidate profile `, err.message);
+    next(err);
+  }
+});
+
 
 module.exports = router;

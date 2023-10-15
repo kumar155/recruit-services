@@ -1,0 +1,10 @@
+{
+    "users": [
+        {
+            "userId": "GDS_User1",
+            "firstName": "GDS_User",
+            "password": "Admin@123",
+            "email": "careers@gds.com"
+        }
+    ]
+}

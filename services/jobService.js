@@ -1,17 +1,17 @@
 const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
+const dbCon = require("../connection");
 
 async function jobsByCategory() {
-    // const offset = helper.getOffset(page, config.listPerPage);
-
+    await dbCon.connection();
     const query = `SELECT * from (SELECT title as label, COUNT(*) as count
                         FROM recruit.jobs
                         WHERE active = 1
                         GROUP BY title) as t1
                         ORDER BY t1.count DESC
                         LIMIT 4`;
-    const rows = await db.query(query);
+    const [rows] = await dbCon.execute(query);
     const data = helper.emptyOrRows(rows);
     return {
         data,
@@ -59,7 +59,7 @@ async function getAllCategories() {
 }
 
 async function recentJobs() {
-    const query = `SELECT title, location, category, created, jobId from recruit.jobs order by created desc limit 5`;
+    const query = `SELECT title, location, category, created, jobId from recruit.jobs where active = 1 order by created desc limit 5`;
     const rows = await db.query(query);
     const data = helper.emptyOrRows(rows);
     return {
@@ -80,21 +80,21 @@ async function getJobDetails(jobId) {
 }
 
 async function getJobsByCategory(category) {
-    const query = `SELECT * FROM recruit.jobs where title = '${category}' and id <> 0`;
+    const query = `SELECT * FROM recruit.jobs where title = '${category}' and active = 1 and id <> 0`;
     const rows = await db.query(query);
 
     return helper.emptyOrRows(rows);
 }
 
 async function getJobsByLocation(location) {
-    const query = `SELECT * FROM recruit.jobs where location = '${location}' and id <> 0`;
+    const query = `SELECT * FROM recruit.jobs where location = '${location}' and active = 1 and id <> 0`;
     const rows = await db.query(query);
 
     return helper.emptyOrRows(rows);
 }
 
 async function getJobsByFilters({ category, location }) {
-    const query = `SELECT * FROM recruit.jobs where title = '${category}' and location = '${location}' and id <> 0`;
+    const query = `SELECT * FROM recruit.jobs where title = '${category}' and location = '${location}' and active = 1 and id <> 0`;
     const rows = await db.query(query);
 
     return helper.emptyOrRows(rows);

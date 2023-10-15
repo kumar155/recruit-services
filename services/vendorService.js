@@ -4,10 +4,10 @@ const config = require("../config");
 const moment = require('moment');
 const formatString = require("../utils/formatString");
 
-async function getAll(page = 1) {
+async function getAll(user) {
     const offset = helper.getOffset(page, config.listPerPage);
     const rows = await db.query(
-        `SELECT * FROM candidate`
+        `SELECT * FROM jobs where postedBy = '${user.id}';`
     );
     const data = helper.emptyOrRows(rows);
     const meta = { page };
@@ -41,10 +41,10 @@ async function createStep1(job) {
     job.secondarySkills && job.secondarySkills.forEach(skill => secondarySkills.push(skill.id));
     const result = await db.query(
         `INSERT INTO jobs 
-        (jobId, title, location, persona, positions, category, skills, secondarySkills, active, created) 
+        (jobId, title, location, persona, positions, category, skills, secondarySkills, active, created, postedBy) 
         VALUES 
         ('${id}', '${job.title}', '${job.location}', '${job.persona}', '${job.positions}', '${job.category}',
-        '${primarySkills.join(',')}', '${secondarySkills.join(',')}',0, '${formatted}')`
+        '${primarySkills.join(',')}', '${secondarySkills.join(',')}',0, '${formatted}', '${job.postedBy}')`
     );
 
     let message = "Error in creating a job";

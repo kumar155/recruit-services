@@ -6,6 +6,33 @@ const jwt = require("jsonwebtoken");
 const date = new Date();
 const formatted = () => date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
 
+
+async function getHistory(userId) {
+    const query = `SELECT j.title, j.jobId, j.location, cj.created, cj.userId FROM recruit.candidatejob as cj
+    inner join recruit.jobs as j on cj.jobId=j.jobId where userId = '${userId}';`
+    const rows = await db.query(query);
+    const data = helper.emptyOrRows(rows);
+    return { data };
+}
+
+async function getProfile(userId) {
+    const rows = await db.query(
+        `SELECT * from candidateprofile where (userId = '${userId}' and id <> 0) order by created desc`
+    );
+    const data = helper.emptyOrRows(rows);
+    return data[0] ? data[0] : null;
+}
+
+async function checkIsAppliedJob(req, jobId) {
+    const tokenData = req.headers.authorization.split(" ");
+    const resp = jwt.decode(tokenData[1]);
+    const rows = await db.query(
+        `SELECT * from candidatejob where (userId = '${resp.user_id}' and jobId = '${jobId}' and jobStatus=1)`
+    );
+    const data = helper.emptyOrRows(rows);
+    return data.length > 0 ? { candidateJobId: data[0].candidateJobId, created: data[0].created } : null;
+}
+
 async function getAll(page = 1) {
     const offset = helper.getOffset(page, config.listPerPage);
     const rows = await db.query(
@@ -58,17 +85,41 @@ async function createStep1(user) {
 }
 
 async function createStep2(user) {
-    const result = await db.query(
-        `INSERT INTO candidateprofile 
-    (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
-    VALUES 
-    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted()}')`
-    );
+    const profile = `SELECT * from candidateprofile where userId='${user.randomString}' and id <> 0`;
+    const rows = await db.query(profile);
+    const data = helper.emptyOrRows(rows);
+    let message = '';
+    if (data.length > 0) {
+        const result = await db.query(
+            `UPDATE candidateprofile SET
+            state = '${user.state}',
+            phone1 = '${user.phone}',
+            location = '${user.location}',
+            experience = '${user.experience}',
+            currentEmployer =  '${user.currentEmployer}',
+            noticePeriod = '${user.noticePeriod}',
+            updated = '${formatted()}'
+            WHERE (userId='${user.randomString}' AND id <> 0)`);
 
-    let message = "Error in building user profile";
+        message = "Error in updating user profile";
 
-    if (result.affectedRows) {
-        message = "User data saved successfully";
+        if (result.affectedRows) {
+            message = "User data updated successfully";
+        }
+
+    } else {
+        const result = await db.query(
+            `INSERT INTO candidateprofile 
+        (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
+        VALUES 
+        ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted()}')`
+        );
+
+        message = "Error in building user profile";
+
+        if (result.affectedRows) {
+            message = "User data saved successfully";
+        }
     }
 
     return { message, next: 3 };
@@ -133,5 +184,8 @@ module.exports = {
     update,
     remove,
     getSelection,
-    apply
+    apply,
+    getHistory,
+    getProfile,
+    checkIsAppliedJob,
 };
