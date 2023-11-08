@@ -4,14 +4,15 @@ const config = require("../config");
 const dbCon = require("../connection");
 
 async function jobsByCategory() {
-    await dbCon.connection();
+    // await dbCon.connection();
     const query = `SELECT * from (SELECT title as label, COUNT(*) as count
                         FROM recruit.jobs
                         WHERE active = 1
                         GROUP BY title) as t1
                         ORDER BY t1.count DESC
                         LIMIT 4`;
-    const [rows] = await dbCon.execute(query);
+    const rows = await db.query(query);
+    // const [rows] = await dbCon.execute(query);
     const data = helper.emptyOrRows(rows);
     return {
         data,
@@ -40,7 +41,7 @@ async function getAllLocations() {
                     (SELECT 
                         location as label,
                         COUNT(*) as count 
-                        FROM recruit.jobs
+                        FROM jobs
                         WHERE active = 1
                         GROUP BY location) as t1
                     ORDER BY t1.count DESC;`
@@ -50,7 +51,7 @@ async function getAllLocations() {
 
 async function getAllCategories() {
     const query = `SELECT * from (SELECT title as label, COUNT(*) as count
-                    FROM recruit.jobs
+                    FROM jobs
                     WHERE active = 1
                     GROUP BY title) as t1
                     ORDER BY t1.count DESC`
@@ -58,12 +59,15 @@ async function getAllCategories() {
     return helper.emptyOrRows(rows);
 }
 
-async function recentJobs() {
-    const query = `SELECT title, location, category, created, jobId from recruit.jobs where active = 1 order by created desc limit 5`;
+async function recentJobs(page) {
+    const limit = 5 * page;
+    const query = `SELECT title, location, category, created, jobId from jobs where active = 1 order by created desc limit ${limit}`;
     const rows = await db.query(query);
+    const count = await db.query(`SELECT count(*) as count from jobs where active = 1`);
     const data = helper.emptyOrRows(rows);
     return {
         data,
+        count: count[0].count,
     };
 }
 
@@ -79,25 +83,37 @@ async function getJobDetails(jobId) {
     return res;
 }
 
-async function getJobsByCategory(category) {
+async function getJobsByCategory({ category, page }) {
     const query = `SELECT * FROM recruit.jobs where title = '${category}' and active = 1 and id <> 0`;
     const rows = await db.query(query);
+    const count = await db.query(`SELECT count(*) as count from jobs where title = '${category}' and active = 1`);
 
-    return helper.emptyOrRows(rows);
+    return {
+        data: helper.emptyOrRows(rows),
+        count: count[0].count,
+    };
 }
 
-async function getJobsByLocation(location) {
+async function getJobsByLocation({ location, page }) {
     const query = `SELECT * FROM recruit.jobs where location = '${location}' and active = 1 and id <> 0`;
     const rows = await db.query(query);
+    
+    const count = await db.query(`SELECT count(*) as count from jobs where location = '${location}' and active = 1`);
 
-    return helper.emptyOrRows(rows);
+    return {
+        data: helper.emptyOrRows(rows),
+        count: count[0].count,
+    };
 }
 
-async function getJobsByFilters({ category, location }) {
+async function getJobsByFilters({ category, location, page }) {
     const query = `SELECT * FROM recruit.jobs where title = '${category}' and location = '${location}' and active = 1 and id <> 0`;
     const rows = await db.query(query);
-
-    return helper.emptyOrRows(rows);
+    const count = await db.query(`SELECT count(*) as count from jobs where title = '${category}' and location = '${location}' and active = 1`);
+    return {
+        data: helper.emptyOrRows(rows),
+        count: count[0].count,
+    };
 }
 
 

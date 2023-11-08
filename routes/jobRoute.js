@@ -38,9 +38,9 @@ router.get("/locationsall", async function (req, res, next) {
     }
 });
 
-router.get("/recentjobs", async function (req, res, next) {
+router.get("/recentjobs/:page", async function (req, res, next) {
     try {
-        res.json(await jobService.recentJobs(req.query.page));
+        res.json(await jobService.recentJobs(req.params.page));
     } catch (err) {
         console.error(`Error while getting programming languages `, err.message);
         next(err);
@@ -54,10 +54,10 @@ router.post("/filters", async function (req, res, next) {
             res.json(await jobService.getJobsByFilters(req.body));
         }
         else if (filters.includes('category')) {
-            res.json(await jobService.getJobsByCategory(req.body.category));
+            res.json(await jobService.getJobsByCategory(req.body));
         }
         else if (filters.includes('location')) {
-            res.json(await jobService.getJobsByLocation(req.body.location));
+            res.json(await jobService.getJobsByLocation(req.body));
         }
     } catch (err) {
         console.error(`Error while getting job details `, err.message);

@@ -41,7 +41,7 @@ router.post("/step2", async function (req, res, next) {
 
 router.post("/apply", async function (req, res, next) {
     try {
-      res.json(await candidateService.apply(req.body));
+      res.json(await candidateService.apply(req, req.body));
     } catch (err) {
       console.error(`Error in building user profile`, err.message);
       next(err);

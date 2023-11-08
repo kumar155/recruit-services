@@ -4,17 +4,19 @@ const config = require("../config");
 const moment = require('moment');
 const formatString = require("../utils/formatString");
 
-async function getAll(user) {
-    const offset = helper.getOffset(page, config.listPerPage);
-    const rows = await db.query(
-        `SELECT * FROM jobs where postedBy = '${user.id}';`
-    );
+async function getAll(id) {
+    // const offset = helper.getOffset(page, config.listPerPage);
+    const query = `SELECT j.title, j.jobId, j.location, j.active, j.created, COUNT(cj.candidateJobId) as responses
+        FROM recruit.jobs j
+        LEFT JOIN
+        recruit.candidatejob cj
+        ON j.jobId = cj.jobId
+        where j.postedBy='${id}'
+        GROUP BY j.title, j.jobId, j.location, j.active, j.created`;
+    const rows = await db.query(query);
     const data = helper.emptyOrRows(rows);
-    const meta = { page };
-
     return {
         data,
-        meta,
     };
 }
 
@@ -122,6 +124,34 @@ async function remove(id) {
     return { message };
 }
 
+async function makeActive(id) {
+    const result = await db.query(
+        `UPDATE jobs SET active=1 where jobId='${id}' and id <> 0`
+    );
+
+    let message = "Error in updating the job status";
+
+    if (result.affectedRows) {
+        message = "Job activated successfully";
+    }
+
+    return { message };
+}
+
+async function makeInactive(id) {
+    const result = await db.query(
+        `UPDATE jobs SET active=0 where jobId='${id}' and id <> 0`
+    );
+
+    let message = "Error in updating the job status";
+
+    if (result.affectedRows) {
+        message = "Job de-activated successfully";
+    }
+
+    return { message };
+}
+
 module.exports = {
     getAll,
     createStep1,
@@ -129,5 +159,7 @@ module.exports = {
     update,
     remove,
     getSelection,
-    publish
+    publish,
+    makeActive,
+    makeInactive,
 };

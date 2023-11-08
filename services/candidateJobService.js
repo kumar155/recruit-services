@@ -1,6 +1,7 @@
 const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
+const jwt = require("jsonwebtoken");
 
 const date = new Date();
 const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
@@ -30,13 +31,15 @@ async function getSelection(id) {
     };
 }
 
-async function apply(user) {
+async function apply(req, user) {
+    const tokenData = req.headers.authorization.split(" ");
+    const resp = jwt.decode(tokenData[1]);
     const randomString = 'CAN' + Math.random().toString(36).substr(2, 5).toUpperCase();
     const result = await db.query(
         `INSERT INTO candidatejob 
     (candidateJobId, jobId, active, userId, jobStatus, created) 
     VALUES 
-    ('${randomString}', '${user.jobId}', 1, '${user.userId}' , 1, '${formatted}')`
+    ('${randomString}', '${user.jobId}', 1, '${resp.user_id}' , 1, '${formatted}')`
     );
 
     let message = "Error in applying job";

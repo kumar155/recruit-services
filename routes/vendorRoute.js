@@ -2,11 +2,29 @@ const express = require("express");
 const router = express.Router();
 const vendorService = require("../services/vendorService");
 
-router.get("/", async function (req, res, next) {
+router.get("/history/:id", async function (req, res, next) {
   try {
-    res.json(await vendorService.getAll(req.query.page));
+    res.json(await vendorService.getAll(req.params.id));
   } catch (err) {
     console.error(`Error while getting programming languages `, err.message);
+    next(err);
+  }
+});
+
+router.get("/active/:id", async function (req, res, next) {
+  try {
+    res.json(await vendorService.makeActive(req.params.id));
+  } catch (err) {
+    console.error(`Error while updating the job status `, err.message);
+    next(err);
+  }
+});
+
+router.get("/deactive/:id", async function (req, res, next) {
+  try {
+    res.json(await vendorService.makeInactive(req.params.id));
+  } catch (err) {
+    console.error(`Error while updating the job status `, err.message);
     next(err);
   }
 });
