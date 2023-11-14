@@ -84,8 +84,16 @@ async function createStep1(user) {
     return { message, next: 1, randomString, token };
 }
 
-async function createStep2(user) {
-    const profile = `SELECT * from candidateprofile where userId='${user.randomString}' and id <> 0`;
+async function createStep2(req,user) {
+    const tokenData = req.headers.authorization.split(" ");
+    const resp = jwt.decode(tokenData[1]);
+    let currentUserId = null;
+    if (user.randomString) {
+        currentUserId = user.randomString;
+    } else if(resp.user_id) {
+        currentUserId = resp.user_id;
+    }
+    const profile = `SELECT * from candidateprofile where userId='${currentUserId}' and id <> 0`;
     const rows = await db.query(profile);
     const data = helper.emptyOrRows(rows);
     let message = '';
@@ -99,7 +107,7 @@ async function createStep2(user) {
             currentEmployer =  '${user.currentEmployer}',
             noticePeriod = '${user.noticePeriod}',
             updated = '${formatted()}'
-            WHERE (userId='${user.randomString}' AND id <> 0)`);
+            WHERE (userId='${currentUserId}' AND id <> 0)`);
 
         message = "Error in updating user profile";
 
@@ -112,7 +120,7 @@ async function createStep2(user) {
             `INSERT INTO candidateprofile 
         (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
         VALUES 
-        ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted()}')`
+        ('${currentUserId}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted()}')`
         );
 
         message = "Error in building user profile";
@@ -125,7 +133,15 @@ async function createStep2(user) {
     return { message, next: 3 };
 }
 
-async function apply(user) {
+async function apply(req, user) {
+    const tokenData = req.headers.authorization.split(" ");
+    const resp = jwt.decode(tokenData[1]);
+    let currentUserId = null;
+    if (user.randomString) {
+        currentUserId = user.randomString;
+    } else if(resp.user_id) {
+        currentUserId = resp.user_id;
+    }
     let topSkills = [];
     user.primarySkills && user.primarySkills.forEach(skill => topSkills.push(skill.id));
     let skills = [];
@@ -134,7 +150,7 @@ async function apply(user) {
     SET designation='${user.designation}', skills='${skills.join(',')}',
     topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
     github='${user.github}', updated='${formatted()}'
-    WHERE (userId='${user.randomString}' AND id <> 0)`;
+    WHERE (userId='${currentUserId}' AND id <> 0)`;
     const result = await db.query(query);
 
     let message = "Error in building user profile";

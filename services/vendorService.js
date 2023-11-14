@@ -20,6 +20,26 @@ async function getAll(id) {
     };
 }
 
+async function getAppliedCandidates(id) {
+    const query = `select cj.userId, cj.created, ct.firstName, cp.topSkills as primaryskills, cp.skills as secondary
+    FROM candidatejob as cj
+    INNER JOIN
+    candidateprofile as cp
+    ON cj.userId = cp.userId
+    INNER JOIN
+    candidate as ct
+    ON cj.userId = ct.userID
+    where cj.jobId='${id}' and cj.jobStatus =1
+    order by cj.created asc`;
+    const rows = await db.query(query);
+    const data = helper.emptyOrRows(rows);
+    return {
+        data,
+    };
+}
+
+
+
 async function getSelection(id) {
     const result = await db.query(
         `SELECT * FROM candidate WHERE id=${id}`
@@ -162,4 +182,5 @@ module.exports = {
     publish,
     makeActive,
     makeInactive,
+    getAppliedCandidates,
 };

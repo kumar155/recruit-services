@@ -11,6 +11,15 @@ router.get("/history/:id", async function (req, res, next) {
   }
 });
 
+router.get("/appliedhistory/:id", async function (req, res, next) {
+  try {
+    res.json(await vendorService.getAppliedCandidates(req.params.id));
+  } catch (err) {
+    console.error(`Error while getting programming languages `, err.message);
+    next(err);
+  }
+});
+
 router.get("/active/:id", async function (req, res, next) {
   try {
     res.json(await vendorService.makeActive(req.params.id));
