@@ -9,6 +9,7 @@ const skillsRouter = require("./routes/skillRoute");
 const jobsRouter = require("./routes/jobRoute");
 const loginRouter = require("./routes/loginRoute");
 const candidateJobRouter = require("./routes/candidateJobRoute");
+const candidateStatusRouter = require("./routes/candidateStatusRoute");
 
 require("dotenv").config();
 
@@ -28,6 +29,7 @@ app.use("/skills", skillsRouter);
 app.use("/jobs", jobsRouter);
 app.use("/candidatejob", candidateJobRouter);
 app.use("/login", loginRouter);
+app.use("/candidatestatus", candidateStatusRouter);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {

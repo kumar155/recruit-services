@@ -3,7 +3,9 @@ const helper = require("../helper");
 const config = require("../config");
 const moment = require('moment');
 const formatString = require("../utils/formatString");
+const dbCon = require("../connection");
 
+const connection = async () => await dbCon.connection();
 async function getAll(id) {
     // const offset = helper.getOffset(page, config.listPerPage);
     const query = `SELECT j.title, j.jobId, j.location, j.active, j.created, COUNT(cj.candidateJobId) as responses
@@ -13,7 +15,7 @@ async function getAll(id) {
         ON j.jobId = cj.jobId
         where j.postedBy='${id}'
         GROUP BY j.title, j.jobId, j.location, j.active, j.created`;
-    const rows = await db.query(query);
+    const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
     return {
         data,
@@ -21,17 +23,23 @@ async function getAll(id) {
 }
 
 async function getAppliedCandidates(id) {
-    const query = `select cj.userId, cj.created, ct.firstName, cp.topSkills as primaryskills, cp.skills as secondary
-    FROM candidatejob as cj
-    INNER JOIN
-    candidateprofile as cp
-    ON cj.userId = cp.userId
-    INNER JOIN
-    candidate as ct
-    ON cj.userId = ct.userID
-    where cj.jobId='${id}' and cj.jobStatus =1
-    order by cj.created asc`;
-    const rows = await db.query(query);
+    const query = `SELECT result.userId, result.jobId, result.created, result.firstName,
+        result.primaryskills,
+        result.secondary,
+        cs.type, cs.comments, cs.created as statusCreated from 
+            (SELECT cj.userId, cj.jobId, cj.created, ct.firstName, cp.topSkills as primaryskills, cp.skills as secondary
+            FROM candidatejob as cj
+            INNER JOIN
+                candidateprofile as cp
+                ON cj.userId = cp.userId
+            INNER JOIN
+                candidate as ct
+                ON cj.userId = ct.userId
+            where cj.jobId='${id}' and cj.jobStatus =1) as result
+    LEFT JOIN candidatestatus as cs
+    ON result.userId = cs.userId and result.jobId = cs.jobId
+    order by result.created asc`;
+    const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
     return {
         data,
@@ -41,7 +49,7 @@ async function getAppliedCandidates(id) {
 
 
 async function getSelection(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `SELECT * FROM candidate WHERE id=${id}`
     );
     const data = helper.emptyOrRows(result);
@@ -61,7 +69,7 @@ async function createStep1(job) {
     job.primarySkills && job.primarySkills.forEach(skill => primarySkills.push(skill.id));
     let secondarySkills = [];
     job.secondarySkills && job.secondarySkills.forEach(skill => secondarySkills.push(skill.id));
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `INSERT INTO jobs 
         (jobId, title, location, persona, positions, category, skills, secondarySkills, active, created, postedBy) 
         VALUES 
@@ -80,7 +88,7 @@ async function createStep1(job) {
 
 async function createStep2(job) {
     const formattedDesc = formatString(job.description);
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `UPDATE jobs 
     SET description='${formattedDesc}'
     WHERE (jobId='${job.jobId}' AND id <> 0)`);
@@ -102,7 +110,7 @@ async function publish(user) {
     const query = `UPDATE jobs
         SET responsibilities='${JSON.stringify(responsibilities)}', active = 1
         WHERE (jobId='${user.jobId}' AND id <> 0)`;
-    const result = await db.query(query);
+    const result = await dbCon.execute(connection, query);
 
     let message = "Error in publishing a job positions";
 
@@ -114,7 +122,7 @@ async function publish(user) {
 }
 
 async function update(id, programmingLanguage) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `UPDATE programming_languages 
     SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
     pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
@@ -131,7 +139,7 @@ async function update(id, programmingLanguage) {
 }
 
 async function remove(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `DELETE FROM programming_languages WHERE id=${id}`
     );
 
@@ -145,7 +153,7 @@ async function remove(id) {
 }
 
 async function makeActive(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `UPDATE jobs SET active=1 where jobId='${id}' and id <> 0`
     );
 
@@ -159,7 +167,7 @@ async function makeActive(id) {
 }
 
 async function makeInactive(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `UPDATE jobs SET active=0 where jobId='${id}' and id <> 0`
     );
 

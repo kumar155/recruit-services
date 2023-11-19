@@ -2,22 +2,23 @@ const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
 const jwt = require("jsonwebtoken");
+const dbCon = require("../connection");
 
 const date = new Date();
 const formatted = () => date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
 
-
+const connection = async () => await dbCon.connection();
 async function getHistory(userId) {
     const query = `SELECT j.title, j.jobId, j.location, cj.created, cj.userId FROM recruit.candidatejob as cj
     inner join recruit.jobs as j on cj.jobId=j.jobId where userId = '${userId}';`
-    const rows = await db.query(query);
+    const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
     return { data };
 }
 
 async function getProfile(userId) {
-    const rows = await db.query(
-        `SELECT * from candidateprofile where (userId = '${userId}' and id <> 0) order by created desc`
+    const rows = await dbCon.execute(connection,
+        `SELECT * from candidateprofile as cp INNER JOIN candidate as c on cp.userId = c.userId  where cp.userId = '${userId}' order by cp.created desc`
     );
     const data = helper.emptyOrRows(rows);
     return data[0] ? data[0] : null;
@@ -26,7 +27,7 @@ async function getProfile(userId) {
 async function checkIsAppliedJob(req, jobId) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
-    const rows = await db.query(
+    const rows = await dbCon.execute(connection,
         `SELECT * from candidatejob where (userId = '${resp.user_id}' and jobId = '${jobId}' and jobStatus=1)`
     );
     const data = helper.emptyOrRows(rows);
@@ -35,7 +36,7 @@ async function checkIsAppliedJob(req, jobId) {
 
 async function getAll(page = 1) {
     const offset = helper.getOffset(page, config.listPerPage);
-    const rows = await db.query(
+    const rows = await dbCon.execute(connection,
         `SELECT * FROM candidate`
     );
     const data = helper.emptyOrRows(rows);
@@ -48,7 +49,7 @@ async function getAll(page = 1) {
 }
 
 async function getSelection(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `SELECT * FROM candidate WHERE id=${id}`
     );
     const data = helper.emptyOrRows(result);
@@ -61,7 +62,7 @@ async function getSelection(id) {
 async function createStep1(user) {
     const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
     let token = null;
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `INSERT INTO candidate 
     (userId, email, password, created, active, firstName, lastName) 
     VALUES 
@@ -84,21 +85,21 @@ async function createStep1(user) {
     return { message, next: 1, randomString, token };
 }
 
-async function createStep2(req,user) {
+async function createStep2(req, user) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
     let currentUserId = null;
     if (user.randomString) {
         currentUserId = user.randomString;
-    } else if(resp.user_id) {
+    } else if (resp.user_id) {
         currentUserId = resp.user_id;
     }
     const profile = `SELECT * from candidateprofile where userId='${currentUserId}' and id <> 0`;
-    const rows = await db.query(profile);
+    const rows = await dbCon.execute(connection, profile);
     const data = helper.emptyOrRows(rows);
     let message = '';
     if (data.length > 0) {
-        const result = await db.query(
+        const result = await dbCon.execute(connection,
             `UPDATE candidateprofile SET
             state = '${user.state}',
             phone1 = '${user.phone}',
@@ -116,7 +117,7 @@ async function createStep2(req,user) {
         }
 
     } else {
-        const result = await db.query(
+        const result = await dbCon.execute(connection,
             `INSERT INTO candidateprofile 
         (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
         VALUES 
@@ -139,7 +140,7 @@ async function apply(req, user) {
     let currentUserId = null;
     if (user.randomString) {
         currentUserId = user.randomString;
-    } else if(resp.user_id) {
+    } else if (resp.user_id) {
         currentUserId = resp.user_id;
     }
     let topSkills = [];
@@ -151,7 +152,7 @@ async function apply(req, user) {
     topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
     github='${user.github}', updated='${formatted()}'
     WHERE (userId='${currentUserId}' AND id <> 0)`;
-    const result = await db.query(query);
+    const result = await dbCon.execute(connection, query);
 
     let message = "Error in building user profile";
 
@@ -163,7 +164,7 @@ async function apply(req, user) {
 }
 
 async function update(id, programmingLanguage) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `UPDATE programming_languages 
     SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
     pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
@@ -180,7 +181,7 @@ async function update(id, programmingLanguage) {
 }
 
 async function remove(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `DELETE FROM programming_languages WHERE id=${id}`
     );
 

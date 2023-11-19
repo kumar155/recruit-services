@@ -1,10 +1,12 @@
 const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
+const dbCon = require("../connection");
 
 async function getMultiple(page = 1) {
+  await dbCon.connection();
   const offset = helper.getOffset(page, config.listPerPage);
-  const rows = await db.query(
+  const rows = await dbCon.execute(
     `SELECT * FROM candidate`
   );
   const data = helper.emptyOrRows(rows);
@@ -17,7 +19,8 @@ async function getMultiple(page = 1) {
 }
 
 async function create(programmingLanguage) {
-  const result = await db.query(
+  await dbCon.connection();
+  const result = await dbCon.execute(
     `INSERT INTO programming_languages 
     (name, released_year, githut_rank, pypl_rank, tiobe_rank) 
     VALUES 
@@ -34,7 +37,8 @@ async function create(programmingLanguage) {
 }
 
 async function update(id, programmingLanguage) {
-  const result = await db.query(
+  await dbCon.connection();
+  const result = await dbCon.execute(
     `UPDATE programming_languages 
     SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
     pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
@@ -51,7 +55,8 @@ async function update(id, programmingLanguage) {
 }
 
 async function remove(id) {
-  const result = await db.query(
+  await dbCon.connection();
+  const result = await dbCon.execute(
     `DELETE FROM programming_languages WHERE id=${id}`
   );
 

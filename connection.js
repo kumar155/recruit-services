@@ -21,9 +21,26 @@ function connection() {
     }
 }
 
+const connectionPool = mysql.createPool({
+    host: '127.0.0.1',
+    user: 'root',
+    password: 'P@55word',
+    database: 'recruit',
+    timezone: 'utc',
+    connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 0
+});
+
 const pool = connection();
 
 module.exports = {
     connection: async () => pool.getConnection(),
-    execute: (...params) => pool.execute(...params),
+    execute: async (connection, ...params) => {
+        const [results] = await pool.query(...params);
+        const con = await connection();
+        con.release();
+        return results;
+    },
+    connectionPool,
 };

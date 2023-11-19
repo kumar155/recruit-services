@@ -2,13 +2,17 @@ const db = require("./db");
 const helper = require("../helper");
 const config = require("../config");
 const jwt = require("jsonwebtoken");
+const dbCon = require("../connection");
 
 const date = new Date();
 const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
 
+const connection = async () => await dbCon.connection();
+
 async function getAll(page = 1) {
+
     const offset = helper.getOffset(page, config.listPerPage);
-    const rows = await db.query(
+    const rows = await dbCon.execute(connection,
         `SELECT * FROM candidate`
     );
     const data = helper.emptyOrRows(rows);
@@ -21,7 +25,7 @@ async function getAll(page = 1) {
 }
 
 async function getSelection(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `SELECT * FROM candidate WHERE id=${id}`
     );
     const data = helper.emptyOrRows(result);
@@ -35,7 +39,7 @@ async function apply(req, user) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
     const randomString = 'CAN' + Math.random().toString(36).substr(2, 5).toUpperCase();
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `INSERT INTO candidatejob 
     (candidateJobId, jobId, active, userId, jobStatus, created) 
     VALUES 
@@ -52,7 +56,7 @@ async function apply(req, user) {
 }
 
 async function createStep2(user) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `INSERT INTO candidateprofile 
     (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
     VALUES 
@@ -69,7 +73,7 @@ async function createStep2(user) {
 }
 
 async function update(id, programmingLanguage) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `UPDATE programming_languages 
     SET name="${programmingLanguage.name}", released_year=${programmingLanguage.released_year}, githut_rank=${programmingLanguage.githut_rank}, 
     pypl_rank=${programmingLanguage.pypl_rank}, tiobe_rank=${programmingLanguage.tiobe_rank} 
@@ -86,7 +90,7 @@ async function update(id, programmingLanguage) {
 }
 
 async function remove(id) {
-    const result = await db.query(
+    const result = await dbCon.execute(connection,
         `DELETE FROM programming_languages WHERE id=${id}`
     );
 

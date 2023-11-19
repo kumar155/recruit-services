@@ -2,9 +2,13 @@ const db = require("./db");
 const helper = require("../helper");
 const jwt = require("jsonwebtoken");
 const inhouse = require("../data/users.json");
+const dbCon = require("../connection");
+
+const connection = async () => await dbCon.connection();
 
 async function login(user) {
-    const result = await db.query(
+    // await dbCon.connection();
+    const result = await dbCon.execute(connection,
         `SELECT userId, active, firstName, lastName from candidate 
     WHERE (email = '${user.loginemail}' and password='${user.loginpassword}' and id <> 0)`
     );
@@ -12,7 +16,7 @@ async function login(user) {
     const data = helper.emptyOrRows(result);
     if (data.length > 0) {
         const currentUser = data[0];
-        const profiles = await db.query(
+        const profiles = await dbCon.execute(connection,
             `SELECT * from candidateprofile where (userId = '${currentUser.userId}' and id <> 0) order by created desc`
         )
         const token = jwt.sign(
@@ -34,7 +38,8 @@ async function login(user) {
 }
 
 async function recruiterLogin(user) {
-    const result = await db.query(
+    // await dbCon.connection();
+    const result = await dbCon.execute(connection,
         `SELECT userId, active, firstName, lastName from vendor WHERE (email = '${user.loginemail}' and password='${user.loginpassword}' and id <> 0)`
     );
     const data = helper.emptyOrRows(result);
