@@ -79,7 +79,10 @@ async function createStep1(user) {
 
     if (result.affectedRows) {
         token = jwt.sign(
-            { user_id: randomString, email: user.email },
+            {
+                user_id: randomString, email: user.email,
+                name: user.firstName
+            },
             process.env.TOKEN_KEY,
             {
                 expiresIn: "2h",
