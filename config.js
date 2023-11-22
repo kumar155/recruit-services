@@ -5,10 +5,11 @@ const config = {
     // user: "restapitest123",
     // password: "restapitest123",
     // database: "restapitest123",
-    host: '127.0.0.1',
+    host: 'localhost',
     user: 'root',
-    password: 'P@55word',
-    database: 'recruit'
+    password: 'root',
+    database: 'recruit',
+    port: 3306,
   },
   listPerPage: 10,
 };

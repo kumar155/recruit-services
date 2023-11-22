@@ -4,8 +4,8 @@ function connection() {
     try {
         const pool = mysql.createPool({
             host: '127.0.0.1',
-            user: 'root',
-            password: 'P@55word',
+            user: 'admin',
+            password: 'Admin@1234',
             database: 'recruit',
             timezone: 'utc',
             connectionLimit: 10,
@@ -24,7 +24,7 @@ function connection() {
 const connectionPool = mysql.createPool({
     host: '127.0.0.1',
     user: 'root',
-    password: 'P@55word',
+    password: 'root',
     database: 'recruit',
     timezone: 'utc',
     connectionLimit: 10,

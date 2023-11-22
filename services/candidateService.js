@@ -9,8 +9,12 @@ const formatted = () => date.toISOString().split('T')[0] + ' ' + date.toTimeStri
 
 const connection = async () => await dbCon.connection();
 async function getHistory(userId) {
-    const query = `SELECT j.title, j.jobId, j.location, cj.created, cj.userId FROM recruit.candidatejob as cj
-    inner join recruit.jobs as j on cj.jobId=j.jobId where userId = '${userId}';`
+    const query = `SELECT j.title, j.jobId, j.location, cj.created,
+    cj.userId, cs.type, cs.comments, cs.created as statusCreated 
+    FROM candidatejob as cj
+    INNER JOIN jobs as j on cj.jobId=j.jobId
+    LEFT JOIN candidatestatus as cs 
+    ON cj.userId = cs.userId and j.jobId = cs.jobId where cj.userId = '${userId}';`
     const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
     return { data };
@@ -27,11 +31,13 @@ async function getProfile(userId) {
 async function checkIsAppliedJob(req, jobId) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
-    const rows = await dbCon.execute(connection,
-        `SELECT * from candidatejob where (userId = '${resp.user_id}' and jobId = '${jobId}' and jobStatus=1)`
-    );
+    const query = `SELECT * from candidatejob as cj
+    LEFT JOIN candidatestatus as cs
+    ON cj.userId = cs.userId and cj.jobId = cs.jobId
+    where (cj.userId = '${resp.user_id}' and cj.jobId = '${jobId}' and jobStatus=1)`;
+    const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
-    return data.length > 0 ? { candidateJobId: data[0].candidateJobId, created: data[0].created } : null;
+    return data.length > 0 ? data : null;
 }
 
 async function getAll(page = 1) {
