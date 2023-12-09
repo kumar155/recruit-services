@@ -8,7 +8,8 @@ const dbCon = require("../connection");
 const connection = async () => await dbCon.connection();
 async function getAll(id) {
     // const offset = helper.getOffset(page, config.listPerPage);
-    const query = `SELECT j.title, j.jobId, j.location, j.active, j.created, COUNT(cj.candidateJobId) as responses
+    const query = `SELECT j.title, j.jobId, j.location,
+        j.active, j.created, COUNT(cj.candidateJobId) as responses
         FROM recruit.jobs j
         LEFT JOIN
         recruit.candidatejob cj
@@ -27,7 +28,8 @@ async function getAppliedCandidates(id) {
         result.primaryskills,
         result.secondary,
         cs.type, cs.comments, cs.created as statusCreated from 
-            (SELECT cj.userId, cj.jobId, cj.created, ct.firstName, cp.topSkills as primaryskills, cp.skills as secondary
+            (SELECT cj.userId, cj.jobId, cj.created, ct.firstName,
+                cp.topSkills as primaryskills, cp.skills as secondary
             FROM candidatejob as cj
             INNER JOIN
                 candidateprofile as cp
@@ -45,8 +47,6 @@ async function getAppliedCandidates(id) {
         data,
     };
 }
-
-
 
 async function getSelection(id) {
     const result = await dbCon.execute(connection,

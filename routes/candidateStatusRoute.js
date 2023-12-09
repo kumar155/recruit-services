@@ -12,6 +12,15 @@ router.get("/:userId/:jobId", async function (req, res, next) {
     }
 });
 
+router.get("/statusAuditHistory/:userId/:jobId", async function (req, res, next) {
+    try {
+        res.json(await candidateService.statusAuditHistory(req.params));
+    } catch (err) {
+        console.error(`Error while getting status audit history `, err.message);
+        next(err);
+    }
+});
+
 router.post("/", async function (req, res, next) {
     try {
         res.json(await candidateService.setStatus(req.body));

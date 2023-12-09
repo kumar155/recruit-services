@@ -17,7 +17,7 @@ router.get("/appliedhistory/:id", async function (req, res, next) {
   } catch (err) {
     console.error(`Error while getting programming languages `, err.message);
     next(err);
-  }
+  } 
 });
 
 router.get("/active/:id", async function (req, res, next) {
