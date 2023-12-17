@@ -7,7 +7,6 @@ const dbCon = require("../connection");
 
 const connection = async () => await dbCon.connection();
 async function getAll(id) {
-    // const offset = helper.getOffset(page, config.listPerPage);
     const query = `SELECT j.title, j.jobId, j.location,
         j.active, j.created, COUNT(cj.candidateJobId) as responses
         FROM recruit.jobs j
@@ -18,8 +17,14 @@ async function getAll(id) {
         GROUP BY j.title, j.jobId, j.location, j.active, j.created`;
     const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
+    const innerQuery = `SELECT res.jobId, cs.type from (${query}) as res
+                INNER JOIN candidatestatus as cs
+                ON res.jobId = cs.jobId`;
+    const result = await dbCon.execute(connection, innerQuery);
+    const innerRows = helper.emptyOrRows(result);
     return {
         data,
+        innerRows,
     };
 }
 

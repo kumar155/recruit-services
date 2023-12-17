@@ -4,9 +4,6 @@ const config = require("../config");
 const jwt = require("jsonwebtoken");
 const dbCon = require("../connection");
 
-const date = new Date();
-const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
-
 const connection = async () => await dbCon.connection();
 
 async function getAll(page = 1) {
@@ -36,6 +33,8 @@ async function getSelection(id) {
 }
 
 async function apply(req, user) {
+    const date = new Date();
+    const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
     const randomString = 'CAN' + Math.random().toString(36).substr(2, 5).toUpperCase();
@@ -49,6 +48,19 @@ async function apply(req, user) {
     let message = "Error in applying job";
 
     if (result.affectedRows) {
+        const createdBy = await dbCon.execute(connection,
+            `SELECT postedBy from jobs where jobId = '${user.jobId}'`);
+
+        const query = `INSERT INTO candidatestatusaudit
+        (userId, jobId, type, comments, created, updatedBy)
+        VALUES
+        ( '${resp.user_id}', '${user.jobId}', 0, null, '${formatted}', '${createdBy[0].postedBy}')`;
+        await dbCon.execute(connection, query);
+        const query2 = `INSERT INTO candidatestatus
+        (userId, jobId, type, comments, created, updated)
+        VALUES
+        ( '${resp.user_id}', '${user.jobId}', 0, 'NA', '${formatted}', '${createdBy[0].postedBy}')`;
+        await dbCon.execute(connection, query2);
         message = "Job applied successfully!";
     }
 
@@ -60,7 +72,7 @@ async function createStep2(user) {
         `INSERT INTO candidateprofile 
     (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
     VALUES 
-    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted}')`
+    ('${user.randomString}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '')`
     );
 
     let message = "Error in building user profile";

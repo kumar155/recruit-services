@@ -31,7 +31,8 @@ async function getProfile(userId) {
 async function checkIsAppliedJob(req, jobId) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
-    const query = `SELECT * from candidatejob as cj
+    const query = `SELECT cj.created as appliedOn, cs.created as updatedOn, cs.type 
+    FROM candidatejob as cj
     LEFT JOIN candidatestatus as cs
     ON cj.userId = cs.userId and cj.jobId = cs.jobId
     where (cj.userId = '${resp.user_id}' and cj.jobId = '${jobId}' and jobStatus=1)`;
