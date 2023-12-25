@@ -14,10 +14,21 @@ async function getHistory(userId) {
     FROM candidatejob as cj
     INNER JOIN jobs as j on cj.jobId=j.jobId
     LEFT JOIN candidatestatus as cs 
-    ON cj.userId = cs.userId and j.jobId = cs.jobId where cj.userId = '${userId}';`
+    ON cj.userId = cs.userId and j.jobId = cs.jobId where cj.userId = '${userId}'
+    ORDER BY cj.created desc;`
+
+    const statsQuery = `SELECT cs.type, COUNT(*) as count
+    FROM candidatejob as cj
+    INNER JOIN candidatestatus as cs
+    ON cj.userId = cs.userId and cj.jobId = cs.jobId
+    WHERE cj.userId = '${userId}'
+    GROUP BY cs.type
+    ORDER BY cs.type`;
+
     const rows = await dbCon.execute(connection, query);
+    const stats = await dbCon.execute(connection, statsQuery);
     const data = helper.emptyOrRows(rows);
-    return { data };
+    return { data, stats: helper.emptyOrRows(stats) };
 }
 
 async function getProfile(userId) {
