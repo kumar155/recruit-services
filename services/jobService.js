@@ -20,6 +20,20 @@ async function jobsByCategory() {
     };
 }
 
+async function getJobCategories() {
+    const query = `SELECT * FROM categories
+                    WHERE active = 1
+                    ORDER BY catName asc`;
+    // const rows = await dbCon.execute(connection,query);
+    const rows = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(rows);
+    return {
+        data,
+    };
+}
+
+
+
 async function jobsByLocation() {
     // await dbCon.connection();
     const query = `SELECT * FROM
@@ -89,6 +103,14 @@ async function getJobDetails(jobId) {
     return res;
 }
 
+async function getSearchJobs(inputdata) {
+    const query = `SELECT c.* FROM jobs c WHERE c.title LIKE '%${inputdata}%'
+        UNION
+        SELECT c.* FROM jobs c WHERE c.jobId LIKE '%${inputdata}%'`;
+    const rows = await dbCon.execute(connection, query);
+    return helper.emptyOrRows(rows);
+}
+
 async function getJobsByCategory({ category, page }) {
     // await dbCon.connection();
     const query = `SELECT * FROM recruit.jobs where title = '${category}' and active = 1 and id <> 0`;
@@ -136,4 +158,6 @@ module.exports = {
     getJobsByFilters,
     getAllLocations,
     getAllCategories,
+    getSearchJobs,
+    getJobCategories
 };

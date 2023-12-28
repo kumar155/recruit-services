@@ -21,6 +21,48 @@ async function getTypes(vendorId) {
     };
 }
 
+
+async function getLocationStats(vendorId) {
+    const query = `
+    SELECT j.location, COUNT(*) as jobs FROM jobs as j
+    WHERE j.postedBy = '${vendorId}'
+    GROUP BY j.location;`
+    const rows = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(rows);
+
+    return {
+        data,
+    };
+}
+
+async function getRecentJobs(vendorId) {
+    const query = `
+    SELECT jobId, title, location, category, created FROM jobs
+    WHERE postedBy = '${vendorId}' and active = 1 order by created desc limit 6;`
+    const rows = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(rows);
+
+    return {
+        data,
+    };
+}
+
+async function getCategories(vendorId) {
+    const query = `
+    SELECT j.category, COUNT(*) as count FROM jobs as j
+    WHERE j.postedBy = '${vendorId}' 
+    GROUP BY j.category
+    ORDER BY j.category asc limit 5;`;
+    const rows = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(rows);
+
+    return {
+        data,
+    };
+}
 module.exports = {
     getTypes,
+    getLocationStats,
+    getRecentJobs,
+    getCategories,
 };

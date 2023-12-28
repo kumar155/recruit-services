@@ -11,6 +11,17 @@ router.get("/categories", async function (req, res, next) {
     }
 });
 
+router.get("/jobcategories", async function (req, res, next) {
+    try {
+        res.json(await jobService.getJobCategories());
+    } catch (err) {
+        console.error(`Error while getting job categories `, err.message);
+        next(err);
+    }
+});
+
+
+
 router.get("/categoriesall", async function (req, res, next) {
     try {
         res.json(await jobService.getAllCategories(req.query.page));
@@ -59,6 +70,15 @@ router.post("/filters", async function (req, res, next) {
         else if (filters.includes('location')) {
             res.json(await jobService.getJobsByLocation(req.body));
         }
+    } catch (err) {
+        console.error(`Error while getting job details `, err.message);
+        next(err);
+    }
+});
+
+router.post("/search", async function (req, res, next) {
+    try {
+        res.json(await jobService.getSearchJobs(req.body.inputdata));
     } catch (err) {
         console.error(`Error while getting job details `, err.message);
         next(err);
