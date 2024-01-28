@@ -13,7 +13,7 @@ router.get("/history/:id", async function (req, res, next) {
 
 router.get("/appliedhistory/:id", async function (req, res, next) {
   try {
-    res.json(await vendorService.getAppliedCandidates(req.params.id));
+    res.json(await vendorService.getAppliedCandidates(req.params.id, req.query?.type));
   } catch (err) {
     console.error(`Error while getting programming languages `, err.message);
     next(err);
@@ -92,6 +92,15 @@ router.delete("/:id", async function (req, res, next) {
     res.json(await vendorService.remove(req.params.id));
   } catch (err) {
     console.error(`Error while deleting programming language`, err.message);
+    next(err);
+  }
+});
+
+router.get("/statushistory/:vendorid", async function (req, res, next) {
+  try {
+    res.json(await vendorService.getStatusTypeHistory(req.params.vendorid, req.query.status));
+  } catch (err) {
+    console.error(`Error while getting programming languages `, err.message);
     next(err);
   }
 });

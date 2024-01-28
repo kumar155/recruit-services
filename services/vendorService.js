@@ -28,7 +28,27 @@ async function getAll(id) {
     };
 }
 
-async function getAppliedCandidates(id) {
+async function getStatusTypeHistory(vendorid, typeid) {
+    const query = `SELECT DISTINCT j.title, cj.jobId, j.location, j.active, j.created
+    from candidatejob as cj
+    INNER JOIN candidatestatus as cs
+    INNER JOIN jobs as j
+    ON j.jobId = cj.jobId and cj.jobId = cs.jobId and cj.userId = cs.userId
+    WHERE cs.type = ${typeid} and j.active = 1 and j.postedBy = '${vendorid}'`;
+    const rows = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(rows);
+    const innerQuery = `SELECT res.jobId, cs.type from (${query}) as res
+                INNER JOIN candidatestatus as cs
+                ON res.jobId = cs.jobId and cs.type = ${typeid}`;
+    const result = await dbCon.execute(connection, innerQuery);
+    const innerRows = helper.emptyOrRows(result);
+    return {
+        data,
+        innerRows,
+    };
+}
+
+async function getAppliedCandidates(id, type) {
     const query = `SELECT result.userId, result.jobId, result.created, result.firstName,
         result.primaryskills,
         result.secondary,
@@ -44,9 +64,14 @@ async function getAppliedCandidates(id) {
                 ON cj.userId = ct.userId
             where cj.jobId='${id}' and cj.jobStatus =1) as result
     LEFT JOIN candidatestatus as cs
-    ON result.userId = cs.userId and result.jobId = cs.jobId
-    order by result.created asc`;
-    const rows = await dbCon.execute(connection, query);
+    ON result.userId = cs.userId and result.jobId = cs.jobId`;
+    const orderCaluse = `order by result.created asc`;
+    let conQuery = `${query} ${orderCaluse}`;
+    if (type) {
+        const whereClause = `WHERE cs.type=${type}`;
+        conQuery = `${query} ${whereClause} ${orderCaluse}`;
+    }
+    const rows = await dbCon.execute(connection, conQuery);
     const data = helper.emptyOrRows(rows);
     return {
         data,
@@ -196,4 +221,5 @@ module.exports = {
     makeActive,
     makeInactive,
     getAppliedCandidates,
+    getStatusTypeHistory,
 };

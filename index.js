@@ -13,6 +13,7 @@ const candidateStatusRouter = require("./routes/candidateStatusRoute");
 const fileRouter = require("./routes/fileRoute");
 const adminRouter = require("./routes/adminRoute");
 const jobCategoryRouter = require("./routes/jobCategoryRoute");
+const initRouter = require("./routes/initRoute");
 
 require("dotenv").config();
 
@@ -36,6 +37,7 @@ app.use("/file", fileRouter);
 app.use("/candidatestatus", candidateStatusRouter);
 app.use("/admin", adminRouter);
 app.use("/jobcategory", jobCategoryRouter);
+app.use("/init", initRouter);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
@@ -47,24 +49,6 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ message: err.message });
   return;
 });
-
-// const allowedOrigins = ["http://localhost:3000", "http://localhost:8080"];
-
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin) return callback(null, true);
-//       if (allowedOrigins.indexOf(origin) === -1) {
-//         var msg =
-//           "The CORS policy for this site does not " +
-//           "allow access from the specified Origin.";
-//         return callback(new Error(msg), false);
-//       }
-//       return callback(null, true);
-//     }
-//   })
-// ); 
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
