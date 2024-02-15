@@ -3,8 +3,8 @@ const mysql = require("mysql2");
 function connection() {
     try {
         const pool = mysql.createPool({
-            host: '127.0.0.1',
-            user: 'admin',
+            host: 'http://3.149.240.114:3306',
+            user: 'mysql',
             password: 'Admin@1234',
             database: 'recruit',
             timezone: 'utc',
@@ -22,9 +22,9 @@ function connection() {
 }
 
 const connectionPool = mysql.createPool({
-    host: '127.0.0.1',
-    user: 'root',
-    password: 'root',
+    host: 'http://3.149.240.114:3306',
+    user: 'mysql',
+    password: 'Admin@1234',
     database: 'recruit',
     timezone: 'utc',
     connectionLimit: 10,
