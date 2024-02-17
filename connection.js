@@ -3,7 +3,8 @@ const mysql = require("mysql2");
 function connection() {
     try {
         const pool = mysql.createPool({
-            host: 'http://3.149.240.114:3306',
+            host: '3.149.240.114',
+            port: '3306',
             user: 'satish',
             password: 'Satish@123',
             database: 'recruit',
@@ -22,7 +23,8 @@ function connection() {
 }
 
 const connectionPool = mysql.createPool({
-    host: 'http://3.149.240.114:3306',
+    host: '3.149.240.114',
+    port: '3306',
     user: 'satish',
     password: 'Satish@123',
     database: 'recruit',
