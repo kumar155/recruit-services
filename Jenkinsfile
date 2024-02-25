@@ -15,6 +15,16 @@ pipeline {
                 git 'https://github.com/kumar155/recruit-services.git'
             }
         }
+        stage('build docker image') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
+            }
+        }
+        // stage('login to dockerhub') {
+        //     steps {
+        //         sh 'echo $DOCKER_HUB_CREDENTIALS | docker login -u  build -t $IMAGE_NAME:$BUILD_NUMBER .'
+        //     }
+        // }
         stage('Build and Push Docker Image') {
             steps {
                 script {
