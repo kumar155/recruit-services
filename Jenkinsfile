@@ -33,7 +33,7 @@ pipeline {
 
                     // Build and push the Docker image
                     docker.withRegistry('https://registry.hub.docker.com', 'jenkins-docker') {
-                        def customImage = docker.build(IMAGE_NAME:latest, "--file ${dockerfile} .")
+                        def customImage = docker.build(${IMAGE_NAME}:latest, "--file ${dockerfile} .")
                         customImage.push()
                     }
                 }
