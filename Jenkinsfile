@@ -36,7 +36,7 @@ pipeline {
 
                     // Build and push the Docker image
                     docker.withRegistry('https://registry.hub.docker.com', 'jenkins-docker') {
-                        def customImage = docker.build('sadonthu/recruit-service:${BUILD_NUMBER}', "--file ${dockerfile} .")
+                        def customImage = docker.build('sadonthu/recruit-service:latest-${BUILD_NUMBER}', "--file ${dockerfile} .")
                         customImage.push()
                     }
                 }
