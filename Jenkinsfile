@@ -12,6 +12,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                sh 'pwd'
+                sh 'echo "hello world"'
                 git 'https://github.com/kumar155/recruit-services.git'
             }
         }
