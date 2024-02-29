@@ -30,6 +30,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 sh 'pwd'
+                sh 'echo ${BUILD_NUMBER}'
                 script {
                     // Define the Dockerfile location
                     def dockerfile = './Dockerfile'
