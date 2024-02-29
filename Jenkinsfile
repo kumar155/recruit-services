@@ -10,13 +10,13 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                sh 'pwd'
-                sh 'echo "hello world"'
-                git 'https://github.com/kumar155/recruit-services.git'
-            }
-        }
+        // stage('Checkout') {
+        //     steps {
+        //         sh 'pwd'
+        //         sh 'echo "hello world"'
+        //         git 'https://github.com/kumar155/recruit-services.git'
+        //     }
+        // }
         // stage('build docker image') {
         //     steps {
         //         sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
@@ -29,6 +29,7 @@ pipeline {
         // }
         stage('Build and Push Docker Image') {
             steps {
+                sh 'pwd'
                 script {
                     // Define the Dockerfile location
                     def dockerfile = './Dockerfile'
