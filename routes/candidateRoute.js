@@ -12,12 +12,12 @@ router.get("/", async function (req, res, next) {
 });
 
 router.get("/:id", async function (req, res, next) {
-    try {
-      res.json(await candidateService.getSelection(req.params.id, req.body));
-    } catch (err) {
-      console.error(`Error while getting programming languages `, err.message);
-      next(err);
-    }
+  try {
+    res.json(await candidateService.getSelection(req.params.id, req.body));
+  } catch (err) {
+    console.error(`Error while getting programming languages `, err.message);
+    next(err);
+  }
 });
 
 /* POST programming language */
@@ -31,21 +31,21 @@ router.post("/", async function (req, res, next) {
 });
 
 router.post("/step2", async function (req, res, next) {
-    try {
-      res.json(await candidateService.createStep2(req, req.body));
-    } catch (err) {
-      console.error(`Error in building user profile`, err.message);
-      next(err);
-    }
+  try {
+    res.json(await candidateService.createStep2(req, req.body));
+  } catch (err) {
+    console.error(`Error in building user profile`, err.message);
+    next(err);
+  }
 });
 
 router.post("/apply", async function (req, res, next) {
-    try {
-      res.json(await candidateService.apply(req, req.body));
-    } catch (err) {
-      console.error(`Error in building user profile`, err.message);
-      next(err);
-    }
+  try {
+    res.json(await candidateService.apply(req, req.body));
+  } catch (err) {
+    console.error(`Error in building user profile`, err.message);
+    next(err);
+  }
 });
 
 /* PUT programming language */

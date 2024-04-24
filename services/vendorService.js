@@ -4,6 +4,7 @@ const config = require("../config");
 const moment = require('moment');
 const formatString = require("../utils/formatString");
 const dbCon = require("../connection");
+const formattedDateTime = require("../utils/getFormattedDateTime");
 
 const connection = async () => await dbCon.connection();
 async function getAll(id) {
@@ -93,8 +94,6 @@ async function createStep1(job) {
     const randomString = Math.floor(Math.random() * 90000) + 10000;
     const id = `POS${randomString}`;
     // const datecreated = moment(new Date()).format('YYYY-MM-DD HH:MM:SS');
-    const date = new Date();
-    const formatted = date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
     let primarySkills = [];
     job.primarySkills && job.primarySkills.forEach(skill => primarySkills.push(skill.id));
     let secondarySkills = [];
@@ -104,7 +103,7 @@ async function createStep1(job) {
         (jobId, title, location, persona, positions, category, skills, secondarySkills, active, created, postedBy) 
         VALUES 
         ('${id}', '${job.title}', '${job.location}', '${job.persona}', '${job.positions}', '${job.category}',
-        '${primarySkills.join(',')}', '${secondarySkills.join(',')}',0, '${formatted}', '${job.postedBy}')`
+        '${primarySkills.join(',')}', '${secondarySkills.join(',')}',0, '${formattedDateTime()}', '${job.postedBy}')`
     );
 
     let message = "Error in creating a job";

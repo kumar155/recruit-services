@@ -3,9 +3,8 @@ const helper = require("../helper");
 const config = require("../config");
 const jwt = require("jsonwebtoken");
 const dbCon = require("../connection");
-
-const date = new Date();
-const formatted = () => date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
+const getFileExtension = require("../utils/getFileExtension");
+const formattedDateTime = require("../utils/getFormattedDateTime");
 
 const connection = async () => await dbCon.connection();
 async function getHistory(userId) {
@@ -84,7 +83,7 @@ async function createStep1(user) {
         `INSERT INTO candidate 
     (userId, email, password, created, active, firstName, lastName) 
     VALUES 
-    ('${randomString}', '${user.email}', '${user.password}','${formatted()}', 0, '${user.firstName}', '${user.lastName}')`
+    ('${randomString}', '${user.email}', '${user.password}','${formattedDateTime()}', 0, '${user.firstName}', '${user.lastName}')`
     );
 
     let message = "Error in creating user profile";
@@ -128,7 +127,7 @@ async function createStep2(req, user) {
             experience = '${user.experience}',
             currentEmployer =  '${user.currentEmployer}',
             noticePeriod = '${user.noticePeriod}',
-            updated = '${formatted()}'
+            updated = '${formattedDateTime()}'
             WHERE (userId='${currentUserId}' AND id <> 0)`);
 
         message = "Error in updating user profile";
@@ -142,7 +141,7 @@ async function createStep2(req, user) {
             `INSERT INTO candidateprofile 
         (userId, state, phone1, location, experience, currentEmployer, noticePeriod, created) 
         VALUES 
-        ('${currentUserId}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formatted()}')`
+        ('${currentUserId}', '${user.state}', '${user.phone}', '${user.location}', '${user.experience}', '${user.currentEmployer}', '${user.noticePeriod}',  '${formattedDateTime()}')`
         );
 
         message = "Error in building user profile";
@@ -168,11 +167,24 @@ async function apply(req, user) {
     user.primarySkills && user.primarySkills.forEach(skill => topSkills.push(skill.id));
     let skills = [];
     user.secondarySkills && user.secondarySkills.forEach(skill => skills.push(skill.id));
-    const query = `UPDATE candidateprofile 
-    SET designation='${user.designation}', skills='${skills.join(',')}',
-    topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
-    github='${user.github}', updated='${formatted()}'
-    WHERE (userId='${currentUserId}' AND id <> 0)`;
+    let query = '';
+    // user opts using existing resume
+    if (user.useExistingResume) {
+        query = `UPDATE candidateprofile 
+                SET designation='${user.designation}', skills='${skills.join(',')}',
+                topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
+                github='${user.github}', updated='${formattedDateTime()}'
+                WHERE (userId='${currentUserId}' AND id <> 0)`;
+    } else {
+        const fileName = `${user.fileName}${getFileExtension(user.fileType)}`;
+        // attchment updated
+        query = `UPDATE candidateprofile 
+                SET designation='${user.designation}', skills='${skills.join(',')}',
+                topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
+                github='${user.github}', attachments='${fileName}',
+                attachmentDateTime='${formattedDateTime()}', updated='${formattedDateTime()}'
+                WHERE (userId='${currentUserId}' AND id <> 0)`;
+    }
     const result = await dbCon.execute(connection, query);
 
     let message = "Error in building user profile";

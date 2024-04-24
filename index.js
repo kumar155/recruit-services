@@ -14,6 +14,7 @@ const fileRouter = require("./routes/fileRoute");
 const adminRouter = require("./routes/adminRoute");
 const jobCategoryRouter = require("./routes/jobCategoryRoute");
 const initRouter = require("./routes/initRoute");
+const resumeRouter = require("./routes/resumeRoute");
 
 require("dotenv").config();
 
@@ -38,6 +39,7 @@ app.use("/candidatestatus", candidateStatusRouter);
 app.use("/admin", adminRouter);
 app.use("/jobcategory", jobCategoryRouter);
 app.use("/init", initRouter);
+app.use("/resume", resumeRouter);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
