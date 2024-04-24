@@ -10,11 +10,13 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/kumar155/recruit-services.git'
-            }
-        }
+        // stage('Checkout') {
+        //     steps {
+        //         sh 'pwd'
+        //         sh 'echo "hello world"'
+        //         git 'https://github.com/kumar155/recruit-services.git'
+        //     }
+        // }
         // stage('build docker image') {
         //     steps {
         //         sh 'docker build -t $IMAGE_NAME:$BUILD_NUMBER .'
@@ -27,13 +29,16 @@ pipeline {
         // }
         stage('Build and Push Docker Image') {
             steps {
+                sh 'pwd'
+                sh 'echo ${BUILD_NUMBER}'
                 script {
                     // Define the Dockerfile location
                     def dockerfile = './Dockerfile'
+                    def buildNumber = '${BUILD_NUMBER}';
 
                     // Build and push the Docker image
                     docker.withRegistry('https://registry.hub.docker.com', 'jenkins-docker') {
-                        def customImage = docker.build('sadonthu/recruit-service:latest', "--file ${dockerfile} .")
+                        def customImage = docker.build("sadonthu/recruit-service:latest", "--file ${dockerfile} .")
                         customImage.push()
                     }
                 }
@@ -46,14 +51,14 @@ pipeline {
         //         }
         //     }
         // }
-        stage('Deploy our image') {
-            steps{
-                script {
-                    docker.withRegistry( '', registryCredential ) {
-                    dockerImage.push()
-                    }
-                }
-            }
-        }
+        // stage('Deploy our image') {
+        //     steps{
+        //         script {
+        //             docker.withRegistry( '', registryCredential ) {
+        //             dockerImage.push()
+        //             }
+        //         }
+        //     }
+        // }
     }
 }
