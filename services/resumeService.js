@@ -3,6 +3,8 @@ const multer = require('multer');
 const FileUploadValidationError = require('../exceptions/file-handling-exceptions');
 const allowedFileTypes = require('../constants/constants');
 // RESUME_FOLDER_PATH=user-resumes
+const path = require('path');
+const fs = require('fs');
 
 // Multer Configuration
 const storage = multer.diskStorage({
@@ -30,3 +32,18 @@ exports.upload = multer({
     cb(null, true);
   }
 });
+
+
+exports.downloadFile = async (filename) => {
+  const filePath = path.join(process.env.RESUME_FOLDER_PATH, filename);
+  return new Promise((resolve, reject) => {
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      const fileStream = fs.createReadStream(filePath);
+      resolve(fileStream);
+    });
+  });
+};
