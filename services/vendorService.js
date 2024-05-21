@@ -53,8 +53,15 @@ async function getAppliedCandidates(id, type) {
     const query = `SELECT result.userId, result.jobId, result.created, result.firstName,
         result.primaryskills,
         result.secondary,
+        result.score,
+        result.keywords,
+        result.summary,
         cs.type, cs.comments, cs.created as statusCreated from 
-            (SELECT cj.userId, cj.jobId, cj.created, ct.firstName,
+            (SELECT cj.userId, cj.jobId, cj.created,
+                cj.matchScore as score,
+                cj.missingKeyWords as keywords,
+                cj.summary,
+                ct.firstName,
                 cp.topSkills as primaryskills, cp.skills as secondary
             FROM candidatejob as cj
             INNER JOIN

@@ -18,7 +18,7 @@ async function getHistory(userId) {
 
     const statsQuery = `SELECT cs.type, COUNT(*) as count
     FROM candidatejob as cj
-    INNER JOIN candidatestatus as cs
+    INNER JOIN (SELECT DISTINCT userId, jobId, type, comments from candidatestatus) as cs
     ON cj.userId = cs.userId and cj.jobId = cs.jobId
     WHERE cj.userId = '${userId}'
     GROUP BY cs.type
@@ -171,29 +171,65 @@ async function apply(req, user) {
     // user opts using existing resume
     if (user.useExistingResume) {
         query = `UPDATE candidateprofile 
-                SET designation='${user.designation}', skills='${skills.join(',')}',
-                topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
-                github='${user.github}', updated='${formattedDateTime()}'
-                WHERE (userId='${currentUserId}' AND id <> 0)`;
+            SET designation='${user.designation}', skills='${skills.join(',')}',
+            topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
+            github='${user.github}', updated='${formattedDateTime()}'
+            WHERE (userId='${currentUserId}' AND id <> 0)`;
     } else {
         const fileName = `${user.fileName}${getFileExtension(user.fileType)}`;
         // attchment updated
         query = `UPDATE candidateprofile 
-                SET designation='${user.designation}', skills='${skills.join(',')}',
-                topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
-                github='${user.github}', attachments='${fileName}',
-                attachmentDateTime='${formattedDateTime()}', updated='${formattedDateTime()}'
-                WHERE (userId='${currentUserId}' AND id <> 0)`;
+            SET designation='${user.designation}', skills='${skills.join(',')}',
+            topSkills='${topSkills.join(',')}', interestArea='${user.interestArea}',
+            github='${user.github}', attachments='${fileName}',
+            attachmentDateTime='${formattedDateTime()}', updated='${formattedDateTime()}'
+            WHERE (userId='${currentUserId}' AND id <> 0)`;
     }
     const result = await dbCon.execute(connection, query);
-
     let message = "Error in building user profile";
 
     if (result.affectedRows) {
-        message = "User data saved & applied to job successfully";
+        return insertCandidateJob({ ...user, userId: resp.user_id });
+        // message = "User data saved & applied to job successfully";
     }
 
-    return { message, next: 3 };
+    return { message, next: 2 };
+}
+
+async function insertCandidateJob(user) {
+    // const tokenData = req.headers.authorization.split(" ");
+    // const resp = jwt.decode(tokenData[1]);
+    const randomString = 'CAN' + Math.random().toString(36).substr(2, 5).toUpperCase();
+    // const result = {
+    // affectedRows: null
+    // };
+    const result = await dbCon.execute(connection,
+        `INSERT INTO candidatejob 
+    (candidateJobId, jobId, active, userId, jobStatus, created) 
+    VALUES 
+    ('${randomString}', '${user.jobId}', 1, '${user.userId}' , 1, '${formattedDateTime()}')`
+    );
+
+    let message = "Error in applying job";
+
+    if (result.affectedRows) {
+        const createdBy = await dbCon.execute(connection,
+            `SELECT postedBy from jobs where jobId = '${user.jobId}'`);
+
+        const query = `INSERT INTO candidatestatusaudit
+        (userId, jobId, type, comments, created, updatedBy)
+        VALUES
+        ( '${user.userId}', '${user.jobId}', 0, null, '${formattedDateTime()}', '${createdBy[0].postedBy}')`;
+        await dbCon.execute(connection, query);
+        const query2 = `INSERT INTO candidatestatus
+        (userId, jobId, type, comments, created, updated)
+        VALUES
+        ( '${user.userId}', '${user.jobId}', 0, 'NA', '${formattedDateTime()}', '${createdBy[0].postedBy}')`;
+        await dbCon.execute(connection, query2);
+        message = "Job applied successfully!";
+    }
+
+    return { message, next: 1, randomString };
 }
 
 async function update(id, programmingLanguage) {

@@ -37,14 +37,17 @@ async function apply(req, user) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
     const randomString = 'CAN' + Math.random().toString(36).substr(2, 5).toUpperCase();
+    let message = "Error in applying job";
+
+    if (user.getOnlyStatus) {
+        message = "";
+    }
     const result = await dbCon.execute(connection,
         `INSERT INTO candidatejob 
     (candidateJobId, jobId, active, userId, jobStatus, created) 
     VALUES 
     ('${randomString}', '${user.jobId}', 1, '${resp.user_id}' , 1, '${formattedDateTime()}')`
     );
-
-    let message = "Error in applying job";
 
     if (result.affectedRows) {
         const createdBy = await dbCon.execute(connection,
