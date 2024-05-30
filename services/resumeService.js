@@ -1,5 +1,5 @@
 const multer = require('multer');
-// const logger = require('../config/logger-config');
+const logger = require('../config/logger-config');
 const FileUploadValidationError = require('../exceptions/file-handling-exceptions');
 const allowedFileTypes = require('../constants/constants');
 // RESUME_FOLDER_PATH=user-resumes
@@ -18,11 +18,11 @@ const storage = multer.diskStorage({
     cb(null, process.env.RESUME_FOLDER_PATH);
   },
   filename: (req, file, cb) => {
-    // logger.info(
-    //   'Uploading file: %s, filetype: %s',
-    //   file.originalname,
-    //   file.mimetype
-    // );
+    logger.info(
+      'Uploading file: %s, filetype: %s',
+      file.originalname,
+      file.mimetype
+    );
     const extension = allowedFileTypes[file.mimetype];
     const newName = `${req.params.id}${extension}`;
     cb(null, newName);
@@ -41,8 +41,8 @@ exports.upload = multer({
 
 exports.uploadAndProcessIntelligence = async (req) => {
   try {
-    console.log('AI entry door', req);
-    console.log('AI path', process.env.AI_PATH);
+    logger.info('AI entry door', req);
+    logger.info('AI path', process.env.AI_PATH);
     const url = `${process.env.AI_PATH}/analyze_resume`;
     const formdata = new FormData();
     formdata.append('resume_file', req.file);
@@ -61,15 +61,15 @@ exports.uploadAndProcessIntelligence = async (req) => {
 
     let status = {};
     let MLresponse = {};
-    console.log('AI post call', options);
+    logger.info('AI post call', options);
     await request(options, (error, response, body) => {
       if (error) throw new Error(error);
       // console.log(response);
-      console.log('AI response body', body); //get your response here
+      logger.info('AI response body', body); //get your response here
       status.statusCode = response.statusCode;
       status.statusMessage = response.statusMessage;
       MLresponse = body;
-      console.log('AI exit', MLresponse);
+      logger.info('AI exit', MLresponse);
       insertResumeAnalysis(req.body, MLresponse);
     });
     // console.log(result);
