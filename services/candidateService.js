@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const dbCon = require("../connection");
 const getFileExtension = require("../utils/getFileExtension");
 const formattedDateTime = require("../utils/getFormattedDateTime");
+const logger = require("../config/logger-config");
 
 const connection = async () => await dbCon.connection();
 async function getHistory(userId) {
@@ -108,6 +109,7 @@ async function createStep1(user) {
 async function createStep2(req, user) {
     const tokenData = req.headers.authorization.split(" ");
     const resp = jwt.decode(tokenData[1]);
+    logger.info("create step2 for a job application process");
     let currentUserId = null;
     if (user.randomString) {
         currentUserId = user.randomString;

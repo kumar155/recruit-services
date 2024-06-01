@@ -42,7 +42,7 @@ exports.upload = multer({
 exports.uploadAndProcessIntelligence = async (req) => {
   try {
     logger.info('AI entry door', req);
-    logger.info('AI path', process.env.AI_PATH);
+    logger.info('AI path: %s', process.env.AI_PATH);
     const url = `${process.env.AI_PATH}/analyze_resume`;
     const formdata = new FormData();
     formdata.append('resume_file', req.file);
@@ -61,11 +61,11 @@ exports.uploadAndProcessIntelligence = async (req) => {
 
     let status = {};
     let MLresponse = {};
-    logger.info('AI post call', options);
+    logger.info('AI post call: %s', options);
     await request(options, (error, response, body) => {
       if (error) throw new Error(error);
       // console.log(response);
-      logger.info('AI response body', body); //get your response here
+      logger.info('AI response body: %s', body); //get your response here
       status.statusCode = response.statusCode;
       status.statusMessage = response.statusMessage;
       MLresponse = body;
