@@ -8,7 +8,7 @@ const fs = require('fs');
 const axios = require("axios");
 var request = require("request");
 const { insertResumeAnalysis } = require('../transactions/candidateJob.trans');
-var FormData = require('form-data');
+// var FormData = require('form-data');
 
 
 const pathAI = process.env.AI_PATH;
@@ -45,9 +45,9 @@ exports.uploadAndProcessIntelligence = async (req) => {
     logger.info('AI entry door', req);
     logger.info('AI path: %s', process.env.AI_PATH);
     const url = `${process.env.AI_PATH}/analyze_resume`;
-    const formdata = new FormData();
-    formdata.append('resume_file', req.file);
-    formdata.append('job_description', 'Engineering Graduate');
+    // const formdata = new FormData();
+    // formdata.append('resume_file', req.file);
+    // formdata.append('job_description', 'Engineering Graduate');
     const filestream = fs.createReadStream(`./${req.file.path}`);
     var options = {
       method: 'POST',
