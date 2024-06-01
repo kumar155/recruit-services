@@ -8,6 +8,7 @@ const fs = require('fs');
 const axios = require("axios");
 var request = require("request");
 const { insertResumeAnalysis } = require('../transactions/candidateJob.trans');
+var FormData = require('form-data');
 
 
 const pathAI = process.env.AI_PATH;
