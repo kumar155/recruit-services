@@ -15,6 +15,7 @@ const adminRouter = require("./routes/adminRoute");
 const jobCategoryRouter = require("./routes/jobCategoryRoute");
 const initRouter = require("./routes/initRoute");
 const resumeRouter = require("./routes/resumeRoute");
+const logger = require("./config/logger-config");
 
 require("dotenv").config();
 
@@ -56,4 +57,12 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
+process.on('uncaughtException',
+  function (err) {
+    console.log(err)
+    var stack = err.stack;
+    logger.error(err, 'Upload failed, invalid input. %s', stack);
+    //you can also notify the err/stack to support via email or other APIs
+  }
+);
 
