@@ -7,10 +7,13 @@ const path = require('path');
 const fs = require('fs');
 const axios = require("axios");
 var request = require("request");
+const dbCon = require("../connection");
+const helper = require("../helper");
 const { insertResumeAnalysis } = require('../transactions/candidateJob.trans');
+
 // var FormData = require('form-data');
 
-
+const connection = async () => await dbCon.connection();
 const pathAI = process.env.AI_PATH;
 
 // Multer Configuration
@@ -42,6 +45,9 @@ exports.upload = multer({
 
 exports.uploadAndProcessIntelligence = async (req) => {
   try {
+    const query = `SELECT plainText FROM jobs WHERE (jobId='${req.body.jobId}' AND id <> 0)`;
+    const result = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(result);
     logger.info('AI entry door', req);
     logger.info('AI path: %s', process.env.AI_PATH);
     const url = `${process.env.AI_PATH}/analyze_resume`;
@@ -55,7 +61,7 @@ exports.uploadAndProcessIntelligence = async (req) => {
       headers: { 'Content-Type': 'multipart/form-data' },
       formData: {
         resume_file: filestream,
-        job_description: 'Engineering Graduate',
+        job_description: data.length > 0 ? data[0].plainText : 'Engineering Graduate',
       },
       json: true,
     };

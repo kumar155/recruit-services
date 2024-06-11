@@ -126,7 +126,7 @@ async function createStep2(job) {
     const formattedDesc = formatString(job.description);
     const result = await dbCon.execute(connection,
         `UPDATE jobs 
-    SET description='${formattedDesc}'
+    SET description='${formattedDesc}', plainText='${job.plainText}'
     WHERE (jobId='${job.jobId}' AND id <> 0)`);
 
     let message = "Error creating job description";
