@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const vendorService = require("../services/vendorService");
+const jwt = require("jsonwebtoken");
 
 router.get("/history/:id", async function (req, res, next) {
   try {
@@ -51,7 +52,9 @@ router.get("/:id", async function (req, res, next) {
 /* POST programming language */
 router.post("/", async function (req, res, next) {
   try {
-    res.json(await vendorService.createStep1(req.body));
+    const tokenData = req.headers.authorization.split(" ");
+    const resp = jwt.decode(tokenData[1]);
+    res.json(await vendorService.createStep1({ ...req.body, postedBy: resp.user_id }));
   } catch (err) {
     console.error(`Error in creating a job position`, err.message);
     next(err);
