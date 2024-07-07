@@ -15,7 +15,8 @@ async function getAll(id) {
         recruit.candidatejob cj
         ON j.jobId = cj.jobId
         where j.postedBy='${id}'
-        GROUP BY j.title, j.jobId, j.location, j.active, j.created`;
+        GROUP BY j.title, j.jobId, j.location, j.active, j.created
+        ORDER BY j.created desc`;
     const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
     const innerQuery = `SELECT res.jobId, cs.type from (${query}) as res
