@@ -36,7 +36,8 @@ async function getStatusTypeHistory(vendorid, typeid) {
     INNER JOIN candidatestatus as cs
     INNER JOIN jobs as j
     ON j.jobId = cj.jobId and cj.jobId = cs.jobId and cj.userId = cs.userId
-    WHERE cs.type = ${typeid} and j.active = 1 and j.postedBy = '${vendorid}'`;
+    WHERE cs.type = ${typeid} and j.active = 1 and j.postedBy = '${vendorid}'
+    ORDER BY j.created desc`;
     const rows = await dbCon.execute(connection, query);
     const data = helper.emptyOrRows(rows);
     const innerQuery = `SELECT res.jobId, cs.type from (${query}) as res
