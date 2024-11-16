@@ -7,8 +7,8 @@ const connection = async () => await dbCon.connection();
 async function insertResumeAnalysis(body, MLresponse) {
     const candidateJobId = body.candidateJobId;
     logger.info('response of the resume AI analysis: %s', MLresponse);
-    const summary = formatString(MLresponse['Profile Summary']);
-    const keywords = formatString(MLresponse['Missing Keywords']);
+    const summary = MLresponse['Profile Summary'] ? formatString(MLresponse['Profile Summary']) : "";
+    const keywords = MLresponse['Missing Keywords'] ? formatString(MLresponse['Missing Keywords']) : "";
     const query = `UPDATE candidatejob SET 
      matchScore='${MLresponse['JD Match']}',
      missingKeyWords='${keywords}',
