@@ -3,8 +3,8 @@ const mysql = require("mysql2");
 function connection() {
     try {
         const pool = mysql.createPool({
-            ...serverConnection,
-            // ...localConnection,
+            // ...serverConnection,
+            ...localConnection,
             timezone: 'utc',
             connectionLimit: 10,
             waitForConnections: true,

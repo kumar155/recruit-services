@@ -29,7 +29,7 @@ async function login(user) {
         return {
             token,
             data: data[0],
-            profile: profiles[0],
+            profile: profiles.length > 0 ? profiles[0] : { userId: currentUser.userId },
             success: true
         };
     }

@@ -61,18 +61,27 @@ router.post("/", async function (req, res, next) {
   }
 });
 
-router.post("/description", async function (req, res, next) {
+router.post("/skills", async function (req, res, next) {
+  try {
+    res.json(await vendorService.createSkills(req.body));
+  } catch (err) {
+    console.error(`Error in posting job description`, err.message);
+    next(err);
+  }
+});
+
+router.post("/publishNewJob", async function (req, res, next) {
     try {
-      res.json(await vendorService.createStep2(req.body));
+      res.json(await vendorService.publishNewJob(req.body));
     } catch (err) {
       console.error(`Error in posting job description`, err.message);
       next(err);
     }
 });
 
-router.post("/publish", async function (req, res, next) {
+router.post("/responsibilities", async function (req, res, next) {
     try {
-      res.json(await vendorService.publish(req.body));
+      res.json(await vendorService.responsibilities(req.body));
     } catch (err) {
       console.error(`Error in publishing job position`, err.message);
       next(err);

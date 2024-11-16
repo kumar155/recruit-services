@@ -90,6 +90,24 @@ async function recentJobs(page) {
     };
 }
 
+async function getAllActiveJobsCount() {
+    const count = await dbCon.execute(connection, `SELECT count(*) as count from jobs where active = 1`);
+    return {
+        count: count[0].count,
+    };
+}
+
+
+async function getJobsCalendar(adminId) {
+    // await dbCon.connection();
+    const query = `SELECT * from jobs where postedBy='${adminId}' order by created desc`;
+    const rows = await dbCon.execute(connection, query);
+    const data = helper.emptyOrRows(rows);
+    return {
+        data,
+    };
+}
+
 async function getJobDetails(jobId) {
     // await dbCon.connection();
     const query = `SELECT * from recruit.jobs where jobId='${jobId}' and id <> 0`;
@@ -116,10 +134,11 @@ async function getJobsByCategory({ category, page }) {
     const query = `SELECT * FROM recruit.jobs where title = '${category}' and active = 1 and id <> 0`;
     const rows = await dbCon.execute(connection, query);
     const count = await dbCon.execute(connection, `SELECT count(*) as count from jobs where title = '${category}' and active = 1`);
-
+    const { count: allJobsCount } = await getAllActiveJobsCount();
     return {
         data: helper.emptyOrRows(rows),
         count: count[0].count,
+        allJobsCount,
     };
 }
 
@@ -130,9 +149,11 @@ async function getJobsByLocation({ location, page }) {
 
     const count = await dbCon.execute(connection, `SELECT count(*) as count from jobs where location = '${location}' and active = 1`);
 
+    const { count: allJobsCount } = await getAllActiveJobsCount();
     return {
         data: helper.emptyOrRows(rows),
         count: count[0].count,
+        allJobsCount
     };
 }
 
@@ -141,9 +162,11 @@ async function getJobsByFilters({ category, location, page }) {
     const query = `SELECT * FROM recruit.jobs where title = '${category}' and location = '${location}' and active = 1 and id <> 0`;
     const rows = await dbCon.execute(connection, query);
     const count = await dbCon.execute(connection, `SELECT count(*) as count from jobs where title = '${category}' and location = '${location}' and active = 1`);
+    const { count: allJobsCount } = await getAllActiveJobsCount();
     return {
         data: helper.emptyOrRows(rows),
         count: count[0].count,
+        allJobsCount,
     };
 }
 
@@ -159,5 +182,7 @@ module.exports = {
     getAllLocations,
     getAllCategories,
     getSearchJobs,
-    getJobCategories
+    getJobCategories,
+    getJobsCalendar,
+    getAllActiveJobsCount
 };

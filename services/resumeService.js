@@ -72,7 +72,7 @@ exports.uploadAndProcessIntelligence = async (req) => {
     await request(options, (error, response, body) => {
       if (error) throw new Error(error);
       // console.log(response);
-      logger.info('AI response body: %s', body); //get your response here
+      logger.info('AI response body: %s', JSON.stringify(body)); //get your response here
       status.statusCode = response.statusCode;
       status.statusMessage = response.statusMessage;
       MLresponse = body;

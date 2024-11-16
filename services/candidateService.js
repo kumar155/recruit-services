@@ -36,7 +36,7 @@ async function getProfile(userId) {
         `SELECT * from candidateprofile as cp INNER JOIN candidate as c on cp.userId = c.userId  where cp.userId = '${userId}' order by cp.created desc`
     );
     const data = helper.emptyOrRows(rows);
-    return data[0] ? data[0] : null;
+    return data[0] ? data[0] : { userId: userId };
 }
 
 async function checkIsAppliedJob(req, jobId) {

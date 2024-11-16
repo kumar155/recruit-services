@@ -124,36 +124,61 @@ async function createStep1(job) {
     return { message, next: 1, randomString: id };
 }
 
-async function createStep2(job) {
-    const formattedDesc = formatString(job.description);
+async function createSkills(job) {
+    let primarySkills = [];
+    job.primary && job.primary.forEach(skill => primarySkills.push(skill.id));
+    let secondarySkills = [];
+    job.secondary && job.secondary.forEach(skill => secondarySkills.push(skill.id));
     const result = await dbCon.execute(connection,
         `UPDATE jobs 
-    SET description='${formattedDesc}', plainText='${job.plainText}'
+    SET skills='${primarySkills.join(',')}', secondarySkills='${secondarySkills.join(',')}'
     WHERE (jobId='${job.jobId}' AND id <> 0)`);
 
-    let message = "Error creating job description";
+    let message = "Error creating job skills";
 
     if (result.affectedRows) {
-        message = "Job description saved successfully";
+        message = "Job skills saved successfully";
     }
 
     return { message, next: 2 };
 }
 
-async function publish(user) {
+async function publishNewJob(job) {
+    let responsibilities = '';
+    const formattedDesc = formatString(job.description);
+    job.responsibilities && job.responsibilities.forEach(resp => {
+        responsibilities = `${responsibilities}<$>${resp.value}`;
+    });
+    const result = await dbCon.execute(connection, `UPDATE jobs 
+        SET description='${formattedDesc}',
+        plainText='${job.plainText}',
+        responsibilities='${JSON.stringify(responsibilities)}',
+        active = 1
+        WHERE (jobId='${job.jobId}' AND id <> 0)`);
+
+    let message = "Error creating job description";
+
+    if (result.affectedRows) {
+        message = "Job description saved and published successfully";
+    }
+
+    return { message, next: 2 };
+}
+
+async function responsibilities(user) {
     let responsibilities = '';
     user.values && user.values.forEach(skill => {
         responsibilities = `${responsibilities}<$>${skill.value}`;
     });
     const query = `UPDATE jobs
-        SET responsibilities='${JSON.stringify(responsibilities)}', active = 1
+        SET responsibilities='${JSON.stringify(responsibilities)}'
         WHERE (jobId='${user.jobId}' AND id <> 0)`;
     const result = await dbCon.execute(connection, query);
 
-    let message = "Error in publishing a job positions";
+    let message = "Error in responsibilities to a job position";
 
     if (result.affectedRows) {
-        message = "Job posted successfully!";
+        message = "Job responsibilities updated successfully!";
     }
 
     return { message, next: 3 };
@@ -221,13 +246,14 @@ async function makeInactive(id) {
 module.exports = {
     getAll,
     createStep1,
-    createStep2,
     update,
     remove,
     getSelection,
-    publish,
+    responsibilities,
     makeActive,
     makeInactive,
     getAppliedCandidates,
     getStatusTypeHistory,
+    createSkills,
+    publishNewJob,
 };
