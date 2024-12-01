@@ -243,6 +243,24 @@ async function makeInactive(id) {
     return { message };
 }
 
+async function onboardNewAdmin(user) {
+    const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
+    const result = await dbCon.execute(connection,
+        `INSERT INTO vendor 
+    (userId, email, password, created, firstName, lastName, active) 
+    VALUES 
+    ('${randomString}', '${user.email}', '${user.password}','${formattedDateTime()}', '${user.firstName}', '${user.lastName}', 1)`
+    );
+
+    let message = "Error in creating admin profile";
+
+    if (result.affectedRows) {
+        message = "User profile created successfully";
+    }
+
+    return { message };
+}
+
 module.exports = {
     getAll,
     createStep1,
@@ -256,4 +274,5 @@ module.exports = {
     getStatusTypeHistory,
     createSkills,
     publishNewJob,
+    onboardNewAdmin,
 };

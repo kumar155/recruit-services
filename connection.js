@@ -5,6 +5,7 @@ function connection() {
         const pool = mysql.createPool({
             ...serverConnection,
             // ...localConnection,
+            // ...serverRDSConnection,
             timezone: 'utc',
             connectionLimit: 10,
             waitForConnections: true,
@@ -24,6 +25,14 @@ const serverConnection = {
     port: '3306',
     user: 'satish',
     password: 'Satish@123',
+    database: 'recruit',
+};
+
+const serverRDSConnection = {
+    host: 'shilp-recruitpro.cndp8cibnwmn.us-east-2.rds.amazonaws.com',
+    port: '3306',
+    user: 'admin',
+    password: 'admin_gds123',
     database: 'recruit',
 };
 

@@ -218,3 +218,6 @@
 {"level":30,"time":1731761362662,"pid":13972,"hostname":"DESKTOP-RMTDCB1","name":"project","msg":"response of the resume AI analysis: [object Object]"}
 {"level":30,"time":1731761362667,"pid":13972,"hostname":"DESKTOP-RMTDCB1","name":"project","msg":"query response of sql: [object Object]"}
 {"level":30,"time":1731761362668,"pid":13972,"hostname":"DESKTOP-RMTDCB1","name":"project","msg":"query affected rows: [object Object]"}
+{"level":30,"time":1732867389584,"pid":18016,"hostname":"DESKTOP-RMTDCB1","name":"project","msg":"create step2 for a job application process"}
+{"level":30,"time":1732867503011,"pid":26472,"hostname":"DESKTOP-RMTDCB1","name":"project","msg":"create step2 for a job application process"}
+{"level":30,"time":1732867527680,"pid":26472,"hostname":"DESKTOP-RMTDCB1","name":"project","msg":"Uploading file: _net_6+years_Experiance_Resume.pdf, filetype: application/pdf"}

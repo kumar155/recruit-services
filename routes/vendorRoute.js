@@ -3,6 +3,7 @@ const router = express.Router();
 const vendorService = require("../services/vendorService");
 const jwt = require("jsonwebtoken");
 
+
 router.get("/history/:id", async function (req, res, next) {
   try {
     res.json(await vendorService.getAll(req.params.id));
@@ -18,7 +19,7 @@ router.get("/appliedhistory/:id", async function (req, res, next) {
   } catch (err) {
     console.error(`Error while getting programming languages `, err.message);
     next(err);
-  } 
+  }
 });
 
 router.get("/active/:id", async function (req, res, next) {
@@ -40,13 +41,13 @@ router.get("/deactive/:id", async function (req, res, next) {
 });
 
 router.get("/:id", async function (req, res, next) {
-    console.log(req);
-    try {
-      res.json(await vendorService.getSelection(req.params.id, req.body));
-    } catch (err) {
-      console.error(`Error while getting programming languages `, err.message);
-      next(err);
-    }
+  console.log(req);
+  try {
+    res.json(await vendorService.getSelection(req.params.id, req.body));
+  } catch (err) {
+    console.error(`Error while getting programming languages `, err.message);
+    next(err);
+  }
 });
 
 /* POST programming language */
@@ -71,21 +72,34 @@ router.post("/skills", async function (req, res, next) {
 });
 
 router.post("/publishNewJob", async function (req, res, next) {
-    try {
-      res.json(await vendorService.publishNewJob(req.body));
-    } catch (err) {
-      console.error(`Error in posting job description`, err.message);
-      next(err);
-    }
+  try {
+    res.json(await vendorService.publishNewJob(req.body));
+  } catch (err) {
+    console.error(`Error in posting job description`, err.message);
+    next(err);
+  }
 });
 
 router.post("/responsibilities", async function (req, res, next) {
-    try {
-      res.json(await vendorService.responsibilities(req.body));
-    } catch (err) {
-      console.error(`Error in publishing job position`, err.message);
-      next(err);
+  try {
+    res.json(await vendorService.responsibilities(req.body));
+  } catch (err) {
+    console.error(`Error in publishing job position`, err.message);
+    next(err);
+  }
+});
+
+router.post("/onboard", async function (req, res, next) {
+  try {
+    if (process.env.ONBOARD_ADMIN) {
+      res.json(await vendorService.onboardNewAdmin(req.body));
+    } else {
+      res.json({ message: "Vendor Oboarding failed; Vendor OnBoarding service is not activated" });
     }
+  } catch (err) {
+    console.error(`Error in publishing job position`, err.message);
+    next(err);
+  }
 });
 
 /* PUT programming language */
