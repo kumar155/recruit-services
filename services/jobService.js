@@ -122,7 +122,7 @@ async function getJobDetails(jobId) {
 }
 
 async function getSearchJobs(inputdata) {
-    const query = `SELECT c.* FROM jobs c WHERE c.title LIKE '%${inputdata}%'
+    const query = `SELECT c.* FROM jobs c WHERE c.title LIKE '%${inputdata}%' and c.active = 1
         UNION
         SELECT c.* FROM jobs c WHERE c.jobId LIKE '%${inputdata}%'`;
     const rows = await dbCon.execute(connection, query);
