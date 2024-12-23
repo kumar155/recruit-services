@@ -128,7 +128,7 @@ async function createStep1(user) {
         sendNewEMail(randomString, values.email);
     }
 
-    return { message, next: 1, randomString, token, success: true };
+    return { message, next: 1, randomString, token, success: true, isUserExists };
 }
 
 async function createStep2(req, user) {
