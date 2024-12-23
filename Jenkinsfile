@@ -4,9 +4,14 @@ pipeline {
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('jenkins-docker')
         IMAGE_NAME = 'sadonthu/recruit-service'
+        CONTAINER_NAME = 'recruit-service-container'
         registry = "sadonthu/recruit-service"
         registryCredential = 'jenkins-docker'
         dockerImage = ''
+
+        // DOCKER_IMAGE = "yourusername/yourimage:latest"  // Docker image to pull
+        TARGET_SERVER = "3.149.240.114"  // Replace with your target server's IP or hostname
+        SSH_CREDENTIALS_ID = "recruit-services-ssh"  // Jenkins SSH credentials ID
     }
 
     stages {
@@ -38,28 +43,42 @@ pipeline {
 
                     // Build and push the Docker image
                     docker.withRegistry('https://registry.hub.docker.com', 'jenkins-docker') {
-                        def customImage = docker.build("sadonthu/recruit-service-1:latest", "--file ${dockerfile} .")
+                        def customImage = docker.build("${IMAGE_NAME}", "--file ${dockerfile} .")
                         customImage.push()
                     }
                 }
             }
         }
-        stage('Pull Docker Image') {
+        stage('Pull and Run Docker Image') {
             steps {
                 script {
-                    sh "docker stop recruit-service-container"
-                    sh "docker rm -f recruit-service-container"
-                    sh "docker image pull sadonthu/recruit-service-1:latest"
+                    // SSH into the target machine and pull/run the Docker image
+                    sshagent([SSH_CREDENTIALS_ID]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no user@${TARGET_SERVER} 'docker rm -f ${CONTAINER_NAME}'
+                            ssh -o StrictHostKeyChecking=no user@${TARGET_SERVER} 'docker image pull ${IMAGE_NAME}'
+                            ssh -o StrictHostKeyChecking=no user@${TARGET_SERVER} 'docker run -d --name ${CONTAINER_NAME} ${IMAGE_NAME}'
+                        """
+                    }
                 }
             }
         }
-        stage('Run image') {
-            steps {
-                script {
-                    sh "docker run -d --name recruit-service-container-1 -p 3001:3001 sadonthu/recruit-service-1:latest"
-                }
-            }
-        }
+        // stage('Pull Docker Image') {
+        //     steps {
+        //         script {
+        //             sh "docker stop recruit-service-container"
+        //             sh "docker rm -f recruit-service-container"
+        //             sh "docker image pull sadonthu/recruit-service-1:latest"
+        //         }
+        //     }
+        // }
+        // stage('Run image') {
+        //     steps {
+        //         script {
+        //             sh "docker run -d --name recruit-service-container-1 -p 3001:3001 sadonthu/recruit-service-1:latest"
+        //         }
+        //     }
+        // }
         // stage('Building our image') {
         //     steps{
         //         script {
