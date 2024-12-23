@@ -44,6 +44,21 @@ pipeline {
                 }
             }
         }
+        stage('Pull Docker Image') {
+            steps {
+                script {
+                    sh "docker rm -f recruit-service-container"
+                    sh "docker image pull sadonthu/recruit-service:latest"
+                }
+            }
+        }
+        stage('Run image') {
+            steps {
+                script {
+                    sh "docker run -d --name recruit-service-container -p 3001:3001 sadonthu/recruit-service"
+                }
+            }
+        }
         // stage('Building our image') {
         //     steps{
         //         script {
