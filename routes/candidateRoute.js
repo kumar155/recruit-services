@@ -20,6 +20,15 @@ router.get("/:id", async function (req, res, next) {
   }
 });
 
+router.get("/verification/:id", async function (req, res, next) {
+  try {
+    res.json(await candidateService.verifyCandidate(req.params.id, req.body));
+  } catch (err) {
+    console.error(`Error while getting programming languages `, err.message);
+    next(err);
+  }
+});
+
 /* POST programming language */
 router.post("/", async function (req, res, next) {
   try {

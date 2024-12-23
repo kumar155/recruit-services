@@ -6,6 +6,7 @@ const dbCon = require("../connection");
 const getFileExtension = require("../utils/getFileExtension");
 const formattedDateTime = require("../utils/getFormattedDateTime");
 const logger = require("../config/logger-config");
+const { sendNewEMail } = require("./emailService");
 
 const connection = async () => await dbCon.connection();
 async function getHistory(userId) {
@@ -77,7 +78,22 @@ async function getSelection(id) {
     };
 }
 
+async function verifyCandidate(id) {
+    const decodedName = Buffer.from(id, 'base64').toString('utf-8');
+    const result = await dbCon.execute(connection,
+        `UPDATE candidate SET
+            active=1
+            WHERE (userId='${decodedName}' AND id <> 0)`
+    );
+
+    if (result.affectedRows) {
+        return { success: true };
+    }
+    return { success: false };
+}
+
 async function createStep1(user) {
+    // sendNewEMail('Test123');
     const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
     let token = null;
     let message = "Error in creating user profile";
@@ -109,6 +125,7 @@ async function createStep1(user) {
             }
         );
         message = "User profile created successfully";
+        sendNewEMail(randomString);
     }
 
     return { message, next: 1, randomString, token, success: true };
@@ -250,4 +267,5 @@ module.exports = {
     getHistory,
     getProfile,
     checkIsAppliedJob,
+    verifyCandidate,
 };
