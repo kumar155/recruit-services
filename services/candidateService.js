@@ -93,42 +93,42 @@ async function verifyCandidate(id) {
 }
 
 async function createStep1(user) {
-    // sendNewEMail('Test123');
-    const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
-    let token = null;
-    let message = "Error in creating user profile";
-    const values = {
-        email: user.email.trim(),
-        firstName: user.firstName.trim(),
-        lastName: user.lastName.trim(),
-    }
+    sendNewEMail('Test123', 'skumar.donthu@gmail.com');
+    // const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
+    // let message = "Error in creating user profile";
+    // const values = {
+    //     email: user.email.trim(),
+    //     firstName: user.firstName.trim(),
+    //     lastName: user.lastName.trim(),
+    // }
     const isUserExists = await dbCon.execute(connection, `SELECT id from candidate where email='${values.email}'`);
     if (isUserExists.length > 0) {
         return { message: 'User already existing with the same email.', success: false };
     }
-    const result = await dbCon.execute(connection,
-        `INSERT INTO candidate 
-    (userId, email, password, created, active, firstName, lastName) 
-    VALUES 
-    ('${randomString}', '${values.email}', '${user.password}','${formattedDateTime()}', 0, '${values.firstName}', '${values.lastName}')`
-    );
+    // const result = await dbCon.execute(connection,
+    //     `INSERT INTO candidate 
+    // (userId, email, password, created, active, firstName, lastName) 
+    // VALUES 
+    // ('${randomString}', '${values.email}', '${user.password}','${formattedDateTime()}', 0, '${values.firstName}', '${values.lastName}')`
+    // );
 
-    if (result.affectedRows) {
-        // token = jwt.sign(
-        //     {
-        //         user_id: randomString, email: user.email,
-        //         name: values.firstName
-        //     },
-        //     process.env.TOKEN_KEY,
-        //     {
-        //         expiresIn: "2h",
-        //     }
-        // );
-        message = "User profile created successfully";
-        sendNewEMail(randomString, values.email);
-    }
+    // if (result.affectedRows) {
+    //     // token = jwt.sign(
+    //     //     {
+    //     //         user_id: randomString, email: user.email,
+    //     //         name: values.firstName
+    //     //     },
+    //     //     process.env.TOKEN_KEY,
+    //     //     {
+    //     //         expiresIn: "2h",
+    //     //     }
+    //     // );
+    //     message = "User profile created successfully";
+    //     sendNewEMail(randomString, values.email);
+    // }
 
-    return { message, next: 1, randomString, token, success: true, isUserExists };
+    // return { message, next: 1, randomString, success: true, isUserExists };
+    return { isUserExists };
 }
 
 async function createStep2(req, user) {
