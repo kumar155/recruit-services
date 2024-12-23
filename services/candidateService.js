@@ -80,20 +80,28 @@ async function getSelection(id) {
 async function createStep1(user) {
     const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
     let token = null;
+    let message = "Error in creating user profile";
+    const values = {
+        email: user.email.trim(),
+        firstName: user.firstName.trim(),
+        lastName: user.lastName.trim(),
+    }
+    const isUserExists = await dbCon.execute(connection, `SELECT id from candidate where email='${values.email}'`);
+    if (isUserExists.length > 0) {
+        return { message: 'User already existing with the same email.', success: false };
+    }
     const result = await dbCon.execute(connection,
         `INSERT INTO candidate 
     (userId, email, password, created, active, firstName, lastName) 
     VALUES 
-    ('${randomString}', '${user.email}', '${user.password}','${formattedDateTime()}', 0, '${user.firstName}', '${user.lastName}')`
+    ('${randomString}', '${values.email}', '${user.password}','${formattedDateTime()}', 0, '${values.firstName}', '${values.lastName}')`
     );
-
-    let message = "Error in creating user profile";
 
     if (result.affectedRows) {
         token = jwt.sign(
             {
                 user_id: randomString, email: user.email,
-                name: user.firstName
+                name: values.firstName
             },
             process.env.TOKEN_KEY,
             {
@@ -103,7 +111,7 @@ async function createStep1(user) {
         message = "User profile created successfully";
     }
 
-    return { message, next: 1, randomString, token };
+    return { message, next: 1, randomString, token, success: true };
 }
 
 async function createStep2(req, user) {
