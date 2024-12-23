@@ -96,11 +96,11 @@ async function createStep1(user) {
     sendNewEMail('Test123', 'skumar.donthu@gmail.com');
     // const randomString = Math.random().toString(36).substr(2, 5).toUpperCase();
     // let message = "Error in creating user profile";
-    // const values = {
-    //     email: user.email.trim(),
-    //     firstName: user.firstName.trim(),
-    //     lastName: user.lastName.trim(),
-    // }
+    const values = {
+        email: user.email.trim(),
+        firstName: user.firstName.trim(),
+        lastName: user.lastName.trim(),
+    };
     const isUserExists = await dbCon.execute(connection, `SELECT id from candidate where email='${values.email}'`);
     if (isUserExists.length > 0) {
         return { message: 'User already existing with the same email.', success: false };
