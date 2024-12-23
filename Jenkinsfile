@@ -38,7 +38,7 @@ pipeline {
 
                     // Build and push the Docker image
                     docker.withRegistry('https://registry.hub.docker.com', 'jenkins-docker') {
-                        def customImage = docker.build("sadonthu/recruit-service:latest", "--file ${dockerfile} .")
+                        def customImage = docker.build("sadonthu/recruit-service-1:latest", "--file ${dockerfile} .")
                         customImage.push()
                     }
                 }
@@ -47,15 +47,16 @@ pipeline {
         stage('Pull Docker Image') {
             steps {
                 script {
+                    sh "docker stop recruit-service-container"
                     sh "docker rm -f recruit-service-container"
-                    sh "docker image pull sadonthu/recruit-service:latest"
+                    sh "docker image pull sadonthu/recruit-service-1:latest"
                 }
             }
         }
         stage('Run image') {
             steps {
                 script {
-                    sh "docker run -d --name recruit-service-container -p 3001:3001 sadonthu/recruit-service"
+                    sh "docker run -d --name recruit-service-container-1 -p 3001:3001 sadonthu/recruit-service-1:latest"
                 }
             }
         }
