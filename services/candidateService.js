@@ -114,18 +114,18 @@ async function createStep1(user) {
     );
 
     if (result.affectedRows) {
-        token = jwt.sign(
-            {
-                user_id: randomString, email: user.email,
-                name: values.firstName
-            },
-            process.env.TOKEN_KEY,
-            {
-                expiresIn: "2h",
-            }
-        );
+        // token = jwt.sign(
+        //     {
+        //         user_id: randomString, email: user.email,
+        //         name: values.firstName
+        //     },
+        //     process.env.TOKEN_KEY,
+        //     {
+        //         expiresIn: "2h",
+        //     }
+        // );
         message = "User profile created successfully";
-        sendNewEMail(randomString);
+        sendNewEMail(randomString, values.email);
     }
 
     return { message, next: 1, randomString, token, success: true };

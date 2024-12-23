@@ -1,10 +1,10 @@
 const { transporter, mailOptions, htmlBodyContent } = require("../utils/email");
 
-function sendNewEMail(userId) {
+function sendNewEMail(userId, email) {
     const encodedId = Buffer.from(userId).toString('base64');
     const bodyContent = htmlBodyContent(encodedId);
     // Send the email
-    transporter.sendMail({ ...mailOptions, html: bodyContent }, (error, info) => {
+    transporter.sendMail({ ...mailOptions, html: bodyContent, to: email }, (error, info) => {
         if (error) {
             console.error('Error sending email:', error);
         } else {
