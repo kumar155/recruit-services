@@ -55,6 +55,7 @@ pipeline {
                     // SSH into the target machine and pull/run the Docker image
                     sshagent([SSH_CREDENTIALS_ID]) {
                         sh """
+                            ssh -i ./recruit-services.pem ec2-user@${TARGET_SERVER}
                             ssh -o StrictHostKeyChecking=no user@${TARGET_SERVER} 'docker rm -f ${CONTAINER_NAME}'
                             ssh -o StrictHostKeyChecking=no user@${TARGET_SERVER} 'docker image pull ${IMAGE_NAME}'
                             ssh -o StrictHostKeyChecking=no user@${TARGET_SERVER} 'docker run -d --name ${CONTAINER_NAME} ${IMAGE_NAME}'
